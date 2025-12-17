@@ -1,0 +1,13 @@
+---
+title: "airQuality"
+output: html_document
+---
+
+```{r}
+
+
+
+
+boxplot(Wind ~ Month, data = airquality, col = c("steelblue1", "steelblue2", "steelblue3"))
+
+```

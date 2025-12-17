@@ -1,0 +1,94 @@
+---
+title: "stateCrime"
+output: html_document
+---
+
+```{r}
+# Install and load necessary packages
+# install.packages("tidyverse")
+# install.packages("scales")
+library(tidyverse)
+library(scales)
+
+# --- 1. & 2. Data Preparation ---
+df <- tribble(
+  ~State, ~Rate,
+  "New Mexico", 3785.3, "Colorado", 3409.6, "Louisiana", 3326.6, "Washington", 3290.5,
+  "Oregon", 3139.6, "Tennessee", 2980.9, "Nevada", 2873.9, "California", 2812.7,
+  "Arkansas", 2795.0, "Maryland", 2697.7, "South Carolina", 2682.0, "Missouri", 2665.4,
+  "Oklahoma", 2616.6, "Kansas", 2529.6, "North Carolina", 2506.7, "Arizona", 2453.3,
+  "Hawaii", 2435.1, "Delaware", 2379.7, "New York", 2370.2, "Montana", 2368.1,
+  "Illinois", 2356.9, "Georgia", 2356.5, "South Dakota", 2346.5, "North Dakota", 2333.6,
+  "Alabama", 2302.2, "Minnesota", 2295.4, "Nebraska", 2289.4, "Vermont", 2276.7,
+  "Ohio", 2259.0, "Michigan", 2258.1, "Virginia", 2247.9, "Indiana", 2235.8,
+  "Florida", 2228.4, "Pennsylvania", 2216.5, "New Jersey", 2205.1, "Utah", 2197.8,
+  "Mississippi", 2195.1, "Kentucky", 2187.9, "Iowa", 2183.3, "Connecticut", 2172.9,
+  "Wyoming", 2163.6, "Wisconsin", 2154.2, "Massachusetts", 2147.2, "West Virginia", 2139.7,
+  "Maine", 2130.8, "Rhode Island", 2124.6, "New Hampshire", 2117.2, "Idaho", 2108.8
+)
+
+party_df <- tribble(
+  ~State, ~Party,
+  "Alabama", "Republican", "Alaska", "Republican", "Arizona", "Republican", "Arkansas", "Republican",
+  "California", "Democrat", "Colorado", "Democrat", "Connecticut", "Democrat", "Delaware", "Democrat",
+  "Florida", "Republican", "Georgia", "Republican", "Hawaii", "Democrat", "Idaho", "Republican",
+  "Illinois", "Democrat", "Indiana", "Republican", "Iowa", "Republican", "Kansas", "Republican",
+  "Kentucky", "Republican", "Louisiana", "Republican", "Maine", "Democrat", "Maryland", "Democrat",
+  "Massachusetts", "Democrat", "Michigan", "Democrat", "Minnesota", "Democrat", "Mississippi", "Republican",
+  "Missouri", "Republican", "Montana", "Republican", "Nebraska", "Republican", "Nevada", "Republican",
+  "New Hampshire", "Democrat", "New Jersey", "Democrat", "New Mexico", "Democrat", "New York", "Democrat",
+  "North Carolina", "Republican", "North Dakota", "Republican", "Ohio", "Republican", "Oklahoma", "Republican",
+  "Oregon", "Democrat", "Pennsylvania", "Democrat", "Rhode Island", "Democrat", "South Carolina", "Republican",
+  "South Dakota", "Republican", "Tennessee", "Republican", "Texas", "Republican", "Utah", "Republican",
+  "Vermont", "Democrat", "Virginia", "Democrat", "Washington", "Democrat", "West Virginia", "Republican",
+  "Wisconsin", "Democrat", "Wyoming", "Republican"
+)
+
+plot_data <- df %>%
+  left_join(party_df, by = "State")
+
+# --- 3. Generate the Fixed Plot ---
+crime_plot <- ggplot(plot_data, aes(x = Rate, y = fct_reorder(State, Rate), fill = Party)) +
+  geom_col(width = 0.75) +
+  geom_text(aes(label = comma(Rate, accuracy = 1)),
+            hjust = -0.1, color = "white", size = 3.5) +
+  scale_fill_manual(values = c("Democrat" = "#0052A5", "Republican" = "#D40032")) +
+  # Expand x-axis to make room for labels
+  scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    title = "STATES RANKED BY TOTAL CRIME RATES",
+    subtitle = "Crime rates per 100,000 residents",
+    caption = "Source: FBI 2022 Crimes in the Nation Statistics"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "#121212", color = "#121212"),
+    panel.background = element_rect(fill = "#121212", color = "#121212"),
+    plot.title = element_text(color = "white", size = 20, face = "plain", hjust = 0.5),
+    plot.subtitle = element_text(color = "white", size = 14, face = "plain", hjust = 0.5, margin = margin(b = 20)),
+    plot.caption = element_text(color = "lightgray", size = 10, hjust = 0),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = "white", size = 11, hjust = 1),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    plot.margin = margin(20, 40, 20, 20)
+  )
+
+# Save the plot with optimal dimensions
+ggsave("crime_rate_chart.png", plot = crime_plot, width = 500, height = 500, units = "in", dpi = 3000, limitsize = FALSE, options(ragg.max_dim = 100000000000))
+
+# To see the plot in RStudio with proper dimensions
+# Option 1: Open the plot in a larger window
+# windows(width = 12, height = 20)  # For Windows
+# X11(width = 12, height = 20)     # For Linux
+# quartz(width = 12, height = 20)  # For Mac
+print(crime_plot)
+
+# Option 2: Or just view the saved PNG file instead of using print()
+# The saved file will always look perfect!
+
+```
+

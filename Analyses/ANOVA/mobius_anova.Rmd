@@ -1,0 +1,194 @@
+---
+title: "mobius_anova"
+output: html_document
+---
+
+```{r}
+View(warpbreaks)
+```
+
+```{r}
+ View(ToothGrowth) 
+```
+
+```{r}
+class(ToothGrowth$len)
+
+class(ToothGrowth$supp)
+
+class(ToothGrowth$dose)
+```
+
+```{r}
+# First, you may need to install the 'car' package if you don't have it
+# install.packages("car") 
+
+# You may also need to install the 'lattice' package for the xyplot
+# install.packages("lattice")
+
+# Load the required libraries
+library(car)
+library(lattice)
+
+# 1. Run the ANOVA and store it in an object
+friendly.aov <- aov(correct ~ condition, data=Friendly)
+
+# 2. Get the ANOVA summary table (this gives you the p-value, F-stat, and Df)
+summary(friendly.aov)
+
+# 3. Set up the plotting window to show two plots side-by-side
+par(mfrow=c(1,2))
+
+# 4. Create the two assumption-checking plots
+plot(friendly.aov, which=1:2)
+
+# 5. Create the plot showing the group means
+xyplot(correct ~ condition, data=Friendly, jitter.x=TRUE, type=c("p","a"))
+```
+```{r}
+### ----------------------------------------------------
+### PART 1: BACKGROUND & ANOVA TEST
+### ----------------------------------------------------
+
+# Load the built-in ToothGrowth dataset
+data(ToothGrowth)
+
+# ---
+# ❓ TO ANSWER THE BACKGROUND QUESTIONS
+# Run this line to open the help file.
+# The 'Description' section will tell you the vitamin and the animal.
+?ToothGrowth
+# ---
+
+
+# ---
+# 📊 TO RUN THE ANOVA & GET DF/P-VALUES
+#
+# The 'dose' column is numeric (0.5, 1.0, 2.0).
+# For a 2-way ANOVA, we must convert it to a factor (a category)
+# just as the instructions hinted.
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+
+# Now, run the 2-way ANOVA.
+# We are modeling length (len) based on supplement (supp), dose,
+# and the interaction between them (supp * dose).
+tooth_aov <- aov(len ~ supp * dose, data = ToothGrowth)
+
+# Print the summary table. This table has all your Df and p-values!
+print(summary(tooth_aov))
+# ---
+
+
+# ---
+# 📖 HOW TO READ THE 'summary(tooth_aov)' OUTPUT:
+#
+# Your console will show a table.
+#
+# 1. Degrees of Freedom (Df):
+#    - Look at the 'Df' column.
+#    - The value in the 'supp' row is the Df for supplement.
+#    - The value in the 'dose' row is the Df for dose.
+#    - The value in the 'supp:dose' row is the Df for the interaction.
+#
+# 2. P-values ('Pr(>F)' column):
+#    - The value in the 'supp' row is the p-value for supplement.
+#    - The value in the 'dose' row is the p-value for dose (it should match the one in your quiz).
+#    - The value in the 'supp:dose' row is the p-value for the interaction.
+# ---
+
+
+### ----------------------------------------------------
+### PART 2: DIAGNOSTIC PLOTS
+### ----------------------------------------------------
+
+# Set the plot window to show two plots (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# Create the two diagnostic plots
+# Plot 1: Residuals vs. Fitted (this is the one you need for 'A')
+# Plot 2: Normal Q-Q
+plot(tooth_aov, which = 1:2)
+
+# Reset the plot window to the default
+par(mfrow = c(1, 1))
+# ---
+
+# ---
+# ❓ TO FIND THE VALUE OF 'A':
+#
+# Look at the *first* plot that appears (titled "Residuals vs. Fitted").
+# Your assignment says: "state the value of 'A' as shown in the x-axis".
+# You will need to find this value 'A' by looking at the x-axis ("Fitted values")
+# of the plot you just generated.
+# ---
+```
+
+```{r}
+# 1. Load the 'lattice' library, which contains the 'xyplot' function
+library(lattice)
+
+# 2. Run the plot code exactly as it's written in your assignment
+# This will generate the plot you need to find the value of "A"
+xyplot(len ~ supp, data=ToothGrowth, type=c("p","a"), 
+       main="Orange Juice Showing Longer Teeth on Average in Guinea Pigs", 
+       ylab="Length of Odontoblasts", 
+       xlab="Vitamin C Delivery Method")
+
+# 3. Run this code to get the "numerical summary table"
+# This calculates the average (mean) tooth length for each supplement type
+tapply(ToothGrowth$len, ToothGrowth$supp, mean)
+```
+```{r}
+# Calculates the mean length for each dose level
+# Make sure you have already run ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+tapply(ToothGrowth$len, ToothGrowth$dose, mean)
+```
+
+```{r}
+# Load the lattice package (if you haven't already)
+library(lattice)
+
+# Create the interaction plot
+xyplot( len ~ dose, data=ToothGrowth, groups=supp, type=c("p","a"), 
+        auto.key=TRUE, 
+        main="Delivery Methods are Equal at High Doses of VC", 
+        ylab="Length of Odontoblasts in Guinea Pigs", 
+        xlab="Dosage Level of Vitamin C in mg/day")
+```
+
+```{r}
+# Calculates the mean length for each supplement type
+tapply(ToothGrowth$len, ToothGrowth$supp, mean)
+```
+
+```{r}
+# Load the lattice package (if you haven't already)
+library(lattice)
+
+# 1. This creates the plot you need to find "A"
+xyplot( len ~ dose, data=ToothGrowth, type=c("p","a"), 
+        main="Higher Doses Showing Longer Teeth on Average in Guinea Pigs", 
+        ylab="Length of Odontoblasts", xlab="Dosage Level in mg/day")
+
+# 2. This computes the numerical summaries for the table
+# It will give you the missing value for dose 1.0
+tapply(ToothGrowth$len, ToothGrowth$dose, mean)
+```
+
+```{r}
+# Load the lattice package (if you haven't already)
+library(lattice)
+
+# 1. This creates the interaction plot
+# The auto.key=TRUE will create the legend you need for "A" and "B"
+xyplot( len ~ dose, data=ToothGrowth, groups=supp, type=c("p","a"), 
+        auto.key=TRUE, 
+        main="Delivery Methods are Equal at High Doses of VC", 
+        ylab="Length of Odontoblasts in Guinea Pigs", 
+        xlab="Dosage Level of Vitamin C in mg/day")
+
+# 2. This computes the numerical summaries for the final, detailed table
+tapply(ToothGrowth$len, list(ToothGrowth$supp, ToothGrowth$dose), mean)
+```
+
+

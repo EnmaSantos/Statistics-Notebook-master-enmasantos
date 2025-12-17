@@ -1,0 +1,31 @@
+---
+title: "KidsData"
+output: html_document
+---
+
+```{r}
+library(mosaic)
+
+library(tidyverse)
+
+library(pander)
+
+View(KidsFeet)
+```
+
+# Create a side-by-side boxplot where the y-axis shows the length of KidsFeet and the x-axis shows the gender of the child.
+
+```{r}
+boxplot(length ~ sex, data=KidsFeet)
+```
+```{r}
+KidsFeet %>% 
+  group_by(sex) %>% 
+  summarise(min = min(length), Q1 = quantile(length, 0.25), median = median(length), Q3 = quantile(length, 0.75), max = max(length)) %>% 
+  pander()
+```
+```{r}
+barplot(table(KidsFeet$sex))
+```
+
+

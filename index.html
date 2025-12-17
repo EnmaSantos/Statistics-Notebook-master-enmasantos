@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Statistics Notebook</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cerulean.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"><img src='Images/snlogo.png' alt='Statistics Notebook Logo' style='height: 30px; margin: -5px 0px'></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    R Help
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="RCommands.html">R Commands</a>
+    </li>
+    <li>
+      <a href="RMarkdownHints.html">R Markdown Hints</a>
+    </li>
+    <li>
+      <a href="RCheatSheetsAndNotes.html">R Cheatsheets &amp; Notes</a>
+    </li>
+    <li>
+      <a href="DataSources.html">Data Sources</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Describing Data
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="GraphicalSummaries.html">Graphical Summaries</a>
+    </li>
+    <li>
+      <a href="NumericalSummaries.html">Numerical Summaries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Making Inference
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="MakingInference.html">Making Inference</a>
+    </li>
+    <li>
+      <a href="tTests.html">t Tests</a>
+    </li>
+    <li>
+      <a href="WilcoxonTests.html">Wilcoxon Tests</a>
+    </li>
+    <li>
+      <a href="Kruskal.html">Kruskal-Wallis Test</a>
+    </li>
+    <li>
+      <a href="ANOVA.html">ANOVA</a>
+    </li>
+    <li>
+      <a href="LinearRegression.html">Linear Regression</a>
+    </li>
+    <li>
+      <a href="LogisticRegression.html">Logistic Regression</a>
+    </li>
+    <li>
+      <a href="ChiSquaredTests.html">Chi Squared Tests</a>
+    </li>
+    <li>
+      <a href="PermutationTests.html">Randomization</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Analyses
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="./Analyses/StudentHousing.html">Good Example Analysis</a>
+    </li>
+    <li>
+      <a href="./Analyses/StudentHousingPOOR.html">Poor Example Analysis</a>
+    </li>
+    <li>
+      <a href="./Analyses/Rent.html">Rent</a>
+    </li>
+    <li>
+      <a href="./Analyses/Stephanie.html">Stephanie</a>
+    </li>
+    <li>
+      <a href="./Analyses/t Tests/HighSchoolSeniors.html">High School Seniors</a>
+    </li>
+    <li>
+      <a href="./Analyses/Wilcoxon Tests/RecallingWords.html">Recalling Words</a>
+    </li>
+    <li>
+      <a href="./Analyses/ANOVA/MyTwoWayANOVA.html">My Two-way ANOVA</a>
+    </li>
+    <li>
+      <a href="./Analyses/Kruskal-Wallis Test/Food.html">Food</a>
+    </li>
+    <li>
+      <a href="./Analyses/Linear Regression/MySimpleLinearRegression.html">My Simple Linear Regression</a>
+    </li>
+    <li>
+      <a href="./Analyses/Linear Regression/CarPrices.html">Car Prices</a>
+    </li>
+    <li>
+      <a href="./Analyses/Logistic Regression/MyLogisticRegression.html">My Logistic Regression</a>
+    </li>
+    <li>
+      <a href="./Analyses/Chi Squared Tests/MyChiSquaredTest.html">My Chi-sqaured Test</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Statistics Notebook</h1>
+
+</div>
+
+
+<!-- You can delete the following copyright statement if you wish: -->
+<div style="color:gray;">
+<!-- Code to change the following paragraphs to gray text -->
+<p>This page, and all pages of this notebook, are meant to be customized
+to become a useful <em>Guide to Statistical Analysis</em> in R for your
+<em>current</em> and <em>future</em> self.</p>
+<div style="font-size:.8em;">
+<!-- Code to shrink font-size of following paragraph -->
+<p>To begin customizing, <a
+href="https://github.com/saundersg/Statistics-Notebook">download</a>
+your own copy of the book <span style="font-size:.8em;">(if you haven’t
+already)</span>. Please note the <a
+href="https://choosealicense.com/licenses/gpl-3.0/">GNU General Public
+License</a> when downloading. You are free to delete this commentary in
+your own copy of the notebook.</p>
+</div>
+<!-- Ends smaller font-size section -->
+</div>
+<!-- End gray text section -->
+<!-- End of download and copyright instructions. -->
+<div id="table-of-contents" class="section level2">
+<h2>Table of Contents</h2>
+<!-- This is how to comment text out. You can comment out the above instructions if you wish. Comments allow the text to remain in the Rmd file, but not be displayed in the html file. -->
+</div>
+<div id="section" class="section level2 tabset tabset-fade">
+<h2 class="tabset tabset-fade"></h2>
+<div id="hide" class="section level3">
+<h3>Hide</h3>
+</div>
+<div id="show-notes" class="section level3">
+<h3>Show Notes</h3>
+<!-- This is a great place to add general notes, then "Knit" the file to have your notes show up in your Statistics-Notebook. --------------- -->
+</div>
+</div>
+<div id="quick-reference-guide" class="section level2">
+<h2>Quick Reference Guide</h2>
+<div id="choosing-the-right-statistical-test" class="section level3">
+<h3><strong>Choosing the Right Statistical Test</strong></h3>
+<p><strong>Step 1:</strong> Identify your response variable (Y) - Is it
+<strong>Quantitative</strong> (numbers that can be averaged)? → Go to
+quantitative tests - Is it <strong>Categorical</strong>
+(groups/categories)? → Go to categorical tests</p>
+<p><strong>Step 2:</strong> Identify your explanatory variable(s) (X) -
+<strong>None</strong> (just one variable)? → Single variable tests -
+<strong>Categorical</strong> X? → Comparison tests (t-tests, ANOVA,
+Chi-squared) - <strong>Quantitative</strong> X? → Regression or
+correlation - <strong>Multiple</strong> X variables? → Multiple
+regression or factorial designs</p>
+<p><strong>Step 3:</strong> Check assumptions -
+<strong>Normality</strong>: If data is normally distributed → parametric
+tests (t-test, ANOVA, regression) - <strong>Non-normal</strong>: If data
+violates normality → non-parametric tests (Wilcoxon, Kruskal-Wallis,
+Mann-Whitney) - <strong>Sample size</strong>: Small samples (&lt;30) →
+be extra careful with normality assumptions</p>
+</div>
+<div id="key-reminders" class="section level3">
+<h3><strong>Key Reminders</strong></h3>
+<p><span style="color:darkred;"><strong>Always plot your data
+first!</strong></span> Graphics reveal patterns, outliers, and
+violations of assumptions.</p>
+<p><span style="color:darkblue;"><strong>Check assumptions before
+testing:</strong></span> - Normality (Q-Q plots, histograms) - Equal
+variance (side-by-side boxplots) - Independence of observations</p>
+<p><span style="color:darkgreen;"><strong>Interpret p-values
+carefully:</strong></span> - p &lt; 0.05: Evidence against null
+hypothesis (statistically significant) - p ≥ 0.05: Insufficient evidence
+to reject null hypothesis</p>
+</div>
+<div id="helpful-links" class="section level3">
+<h3><strong>Helpful Links</strong></h3>
+<ul>
+<li><a href="RMarkdownHints.html">R Markdown Customization Help</a></li>
+<li><a href="RCommands.html">R Commands Reference</a></li>
+<li><a href="MakingInference.html">Making Inference</a></li>
+<li><a href="PermutationTests.html">Permutation Tests</a></li>
+</ul>
+<!-- End your notes before here. ------------------------------------- -->
+</div>
+</div>
+<div id="section-1" class="section level2">
+<h2></h2>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QuantY.png" width=35px;> <span
+class="tooltipimagetext">Y is a single quantitative variable of
+interest. This would be like “heights” of BYU-Idaho students.</span></p>
+</div>
+</div>
+<div id="one-quantitative-response-variable-y"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">One Quantitative Response Variable
+Y</h2>
+<div id="graphics" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics to visualize the distribution of a single
+quantitative variable:</strong></p>
+<ul>
+<li><strong><a
+href="GraphicalSummaries.html#histogram">Histogram</a></strong>: Shows
+the shape of the distribution (normal, skewed, etc.)</li>
+<li><strong><a
+href="GraphicalSummaries.html#boxplots">Boxplot</a></strong>: Identifies
+outliers and shows five-number summary</li>
+<li><strong><a href="GraphicalSummaries.html#dot-plots">Dot
+Plot</a></strong>: Good for smaller datasets to see individual
+observations</li>
+</ul>
+<p><strong>What to look for:</strong> Check for normality, outliers, and
+whether the data is symmetric or skewed.</p>
+<p><a href="GraphicalSummaries.html#histogram">
+<img class="myhover" src="Images/histogram.png" alt="Histogram" title="Histogram">
+</a> <a href="GraphicalSummaries.html#dot-plots">
+<img class="myhover" src="Images/dotplotsingle.png" alt="Dot Plot" title="Dot Plot">
+</a> <a href="GraphicalSummaries.html#boxplots">
+<img class="myhover" src="Images/boxplotsingle.png" alt="Boxplot" title="Boxplot">
+</a></p>
+<!--- End your notes before here.  ------------------>
+</div>
+</div>
+<div id="tests" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Testing one quantitative variable (comparing to a
+hypothesized value):</strong></p>
+<div id="parametric-tests-assume-normality" class="section level4">
+<h4>Parametric Tests (assume normality):</h4>
+<ul>
+<li><strong><a href="tTests.html">One Sample t Test</a></strong>: Test
+if the mean equals a specific value
+<ul>
+<li>Use when: Data is approximately normal OR sample size is large (n
+&gt; 30)</li>
+<li>Example: Is the average temperature different from 72°F?</li>
+</ul></li>
+</ul>
+</div>
+<div id="non-parametric-tests-no-normality-assumption"
+class="section level4">
+<h4>Non-Parametric Tests (no normality assumption):</h4>
+<ul>
+<li><strong><a href="WilcoxonTests.html">Wilcoxon Signed-Rank
+Test</a></strong>: Test if the median equals a specific value
+<ul>
+<li>Use when: Data is NOT normal AND sample size is small</li>
+<li>More robust to outliers</li>
+</ul></li>
+</ul>
+</div>
+<div id="descriptive-statistics" class="section level4">
+<h4>Descriptive Statistics:</h4>
+<ul>
+<li><strong><a href="NumericalSummaries.html">Numerical
+Summaries</a></strong>: Mean, median, standard deviation, five-number
+summary
+<ul>
+<li>Always calculate these first!</li>
+<li>Compare mean vs. median to check for skewness</li>
+</ul></li>
+</ul>
+<p><strong>Quick Tip:</strong> If mean ≈ median, data is likely
+symmetric. If mean &gt; median, data is right-skewed.</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+<div id="section-2" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QuantYQualXg2.png" width=59px;> <span
+class="tooltipimagetext">Y is a single quantitative variable of
+interest. This would be like “heights” of BYU-Idaho students. X is a
+qualitative (categorical) variable of interest like “gender” that has
+just two groups “A” and “B”. So this logo represents situtations where
+we would want to compare heights of male (group A) and female (group B)
+students.</span></p>
+</div>
+<div id="quantitative-y-categorical-x-2-groups"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Quantitative Y | Categorical X (2
+Groups)</h2>
+<div id="graphics-1" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics to compare two groups:</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#boxplots">Side-by-side
+Boxplots</a></strong>: Best for comparing distributions and checking
+equal variance</li>
+<li><strong><a href="GraphicalSummaries.html#dot-plots">Side-by-side Dot
+Plots</a></strong>: Shows individual data points for each group</li>
+</ul>
+<p><strong>What to look for:</strong> - Do the groups have similar
+spread (variance)? - Are there outliers in either group? - Do both
+groups appear normally distributed?</p>
+<p><a href="GraphicalSummaries.html#boxplots">
+<img class="myhover" src="Images/boxplot.png" alt="Side-by-side Boxplots" title="Side-by-side Boxplots">
+</a> <a href="GraphicalSummaries.html#dot-plots">
+<img class="myhover" src="Images/dotplotdouble.png" alt="Dot Plot" title="Side-by-side Dot Plots">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-1" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Comparing two groups:</strong></p>
+<div id="for-independent-groups-different-subjects-in-each-group"
+class="section level4">
+<h4>For Independent Groups (different subjects in each group):</h4>
+<ul>
+<li><strong><a href="tTests.html">Independent Samples t
+Test</a></strong>: Compare means of two independent groups
+<ul>
+<li>Use when: Data is normal, independent observations, roughly equal
+variances</li>
+<li>Example: Compare heights of males vs. females</li>
+</ul></li>
+<li><strong><a href="WilcoxonTests.html">Mann-Whitney (Wilcoxon Rank
+Sum) Test</a></strong>: Compare distributions of two independent groups
+<ul>
+<li>Use when: Data is NOT normal OR has outliers</li>
+<li>Non-parametric alternative to independent t-test</li>
+</ul></li>
+</ul>
+</div>
+<div id="for-paireddependent-groups-same-subjects-measured-twice"
+class="section level4">
+<h4>For Paired/Dependent Groups (same subjects measured twice):</h4>
+<ul>
+<li><strong><a href="tTests.html">Paired t Test</a></strong>: Compare
+means of paired observations
+<ul>
+<li>Use when: Before/after measurements, matched pairs</li>
+<li>Example: Compare test scores before and after tutoring (same
+students)</li>
+</ul></li>
+<li><strong><a href="WilcoxonTests.html">Wilcoxon Signed-Rank
+Test</a></strong>: Non-parametric version of paired t-test
+<ul>
+<li>Use when: Paired data is NOT normal</li>
+</ul></li>
+</ul>
+<p><strong>Key Decision:</strong> Are the groups independent or paired?
+This determines which test to use!</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+<div id="section-3" class="section level2">
+<h2></h2>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QuantYQualXg3plus.png" width=59px;> <span
+class="tooltipimagetext">Y is a single quantitative variable of
+interest, like “heights” of BYU-Idaho students. X is a categorical
+(qualitative) variable like which Math 221 you took, 221A, 221B, or
+221C. In other words, X has three or more groups. So “Classrank” could
+be X, with groups “Freshman”, “Sophomore”, “Junior”, and
+“Senior”.</span></p>
+</div>
+</div>
+<div id="quantitative-y-categorical-x-3-groups"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Quantitative Y | Categorical X (3+
+Groups)</h2>
+<div id="graphics-2" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics to compare three or more
+groups:</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#boxplots">Side-by-side
+Boxplots</a></strong>: Best for comparing multiple group distributions
+simultaneously</li>
+<li><strong><a href="GraphicalSummaries.html#dot-plots">Side-by-side Dot
+Plots</a></strong>: Shows all individual observations across groups</li>
+</ul>
+<p><strong>What to look for:</strong> - Do all groups have similar
+spreads (homogeneity of variance)? - Which group(s) appear different
+from the others? - Are there outliers in any group?</p>
+<p><a href="GraphicalSummaries.html#boxplots">
+<img class="myhover" src="Images/boxplotthree.png" alt="Side-by-side Boxplots" title="Side-by-side Boxplots 3+ Groups">
+</a> <a href="GraphicalSummaries.html#dot-plots">
+<img class="myhover" src="Images/dotplottriple.png" alt="Side-by-side Dot Plots" title="Side-by-side Dot Plots 3+ Groups">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-2" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Comparing three or more groups:</strong></p>
+<div id="parametric-test" class="section level4">
+<h4>Parametric Test:</h4>
+<ul>
+<li><strong><a href="ANOVA.html">One-Way ANOVA</a></strong>: Compare
+means across 3+ groups
+<ul>
+<li>Use when: Data is normal in each group, equal variances across
+groups</li>
+<li>Example: Compare test scores across Freshman, Sophomore, Junior,
+Senior</li>
+<li>Tests if <strong>at least one</strong> group mean is different
+(doesn’t tell you which)</li>
+<li>Follow up with post-hoc tests (Tukey, Bonferroni) to identify which
+groups differ</li>
+</ul></li>
+</ul>
+</div>
+<div id="non-parametric-alternative" class="section level4">
+<h4>Non-Parametric Alternative:</h4>
+<ul>
+<li><strong><a href="Kruskal.html">Kruskal-Wallis Test</a></strong>:
+Compare distributions across 3+ groups
+<ul>
+<li>Use when: Data violates normality OR has outliers</li>
+<li>Non-parametric alternative to ANOVA</li>
+<li>More robust to violations of assumptions</li>
+</ul></li>
+</ul>
+<p><strong>Important:</strong> ANOVA/Kruskal-Wallis only tell you if
+groups differ overall. You need follow-up tests to determine which
+specific groups are different from each other.</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-4" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QuantYMultQualX.png" width=80px;> <span
+class="tooltipimagetext">Y is a single quantitative variable of
+interest, like “heights” of BYU-Idaho students. X1 is a categorical
+(qualitative) variable like gender, with levels “boy” and “girl.” X2 is
+another categorical (qualitative) variable like “Classrank” with levels
+“Freshman”, “Sophomore”, and “Junior”. Of course, both X1 and X2 can
+have as many levels as you want to work with, but must have at least two
+levels each.</span></p>
+</div>
+<div id="quantitative-y-multiple-categorical-x"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Quantitative Y | Multiple Categorical
+X</h2>
+<div id="graphics-3" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics when you have multiple categorical
+explanatory variables:</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#boxplots">Side-by-side
+Boxplots</a></strong>: Create separate plots for each combination of
+factors</li>
+<li><strong>Interaction Plots</strong>: Show how the effect of one
+factor depends on the level of another factor</li>
+</ul>
+<p><strong>What to look for:</strong> - Are the patterns consistent
+across factor combinations? - Do you see interaction effects
+(non-parallel lines in interaction plots)? - Are there outliers in any
+combination of groups?</p>
+<p><a href="GraphicalSummaries.html#boxplots">
+<img class="myhover" src="Images/boxplotthree.png" alt="Side-by-side Boxplots" title="Side-by-side Boxplots 3+ Groups">
+</a> <a href="GraphicalSummaries.html#dot-plots">
+<img class="myhover" src="Images/dotplottriple.png" alt="Side-by-side Dot Plots" title="Side-by-side Dot Plots 3+ Groups">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-3" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Analyzing effects of multiple categorical
+variables:</strong></p>
+<div id="factorial-anova" class="section level4">
+<h4>Factorial ANOVA:</h4>
+<ul>
+<li><strong><a href="ANOVA.html">Two-Way ANOVA</a></strong>: Analyze
+effects of 2+ categorical variables simultaneously
+<ul>
+<li>Use when: Data is normal, equal variances, independent
+observations</li>
+<li>Tests:
+<ul>
+<li><strong>Main effects</strong>: Does each factor influence Y
+independently?</li>
+<li><strong>Interaction effects</strong>: Does the effect of one factor
+depend on the other factor?</li>
+</ul></li>
+<li>Example: Test effect of Gender AND Major on GPA</li>
+</ul></li>
+</ul>
+<p><strong>Key Concepts:</strong> - <strong>Main Effect</strong>: The
+individual effect of each factor, ignoring the other factors -
+<strong>Interaction Effect</strong>: When the effect of one factor
+changes depending on the level of another factor - If interaction is
+significant, focus on that rather than main effects</p>
+<p><strong>Example:</strong> If studying effect of teaching method AND
+class time on test scores, an interaction would mean that morning
+classes benefit more from one teaching method while evening classes
+benefit more from another.</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-5" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QuantYQuantX.png" width=59px;> <span
+class="tooltipimagetext">Y is a single quantitative variable of
+interest, like “height”. X is another single quantitative variable of
+interest, like “shoe-size”. This would imply we are using “shoe-size”
+(X) to explain “height” (Y).</span></p>
+</div>
+<div id="quantitative-y-quantitative-x"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Quantitative Y | Quantitative X</h2>
+<div id="graphics-4" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics to examine the relationship between two
+quantitative variables:</strong></p>
+<ul>
+<li><strong><a
+href="GraphicalSummaries.html#scatterplots">Scatterplot</a></strong>:
+Essential for visualizing the relationship
+<ul>
+<li>Shows pattern, strength, and direction of relationship</li>
+<li>Reveals outliers and influential points</li>
+</ul></li>
+</ul>
+<p><strong>What to look for:</strong> - <strong>Linear or
+curved</strong> relationship? - <strong>Positive or negative</strong>
+relationship? - <strong>Strong or weak</strong> relationship? - Any
+<strong>outliers</strong> or unusual patterns? - Is the spread
+<strong>constant</strong> across X values (homoscedasticity)?</p>
+<p><a href="GraphicalSummaries.html#scatterplots">
+<img class="myhover" src="Images/scatterplot.png" alt="Scatterplot" title="Scatterplot">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-4" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Analyzing the relationship between two quantitative
+variables:</strong></p>
+<div id="simple-linear-regression" class="section level4">
+<h4>Simple Linear Regression:</h4>
+<ul>
+<li><strong><a href="LinearRegression.html">Simple Linear
+Regression</a></strong>: Model Y as a linear function of X
+<ul>
+<li>Use when: Relationship appears linear, residuals are normal,
+constant variance</li>
+<li>Equation: Y = β₀ + β₁X + ε</li>
+<li>Tests whether slope (β₁) is significantly different from zero</li>
+<li>Provides R² (proportion of variance explained)</li>
+</ul></li>
+</ul>
+</div>
+<div id="correlation" class="section level4">
+<h4>Correlation:</h4>
+<ul>
+<li><strong>Pearson Correlation (r)</strong>: Measures strength and
+direction of linear relationship
+<ul>
+<li>Range: -1 to +1</li>
+<li>r = 0: No linear relationship</li>
+<li>r = ±1: Perfect linear relationship</li>
+<li>Use when: Both variables are approximately normal</li>
+</ul></li>
+</ul>
+<p><strong>Important Regression Assumptions:</strong> 1.
+<strong>Linearity</strong>: Relationship is linear (check scatterplot)
+2. <strong>Independence</strong>: Observations are independent 3.
+<strong>Normality</strong>: Residuals are normally distributed (check
+Q-Q plot) 4. <strong>Equal variance</strong>: Spread of residuals is
+constant (check residuals vs. fitted plot)</p>
+<p><strong>Remember:</strong> Correlation does NOT imply causation!</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-6" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QuantYMultX.png" width=100px;> <span
+class="tooltipimagetext">Y is a single quantitative variable of
+interest, like height. While we could use an X1 of “shoe-size” to
+explain height, we might also want to use a second x-variable, X2, like
+“gender” to help explain height. Further x-variables could also be
+used.</span></p>
+</div>
+<div id="quantitative-y-multiple-x"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Quantitative Y | Multiple X</h2>
+<div id="graphics-5" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics when you have multiple explanatory
+variables:</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#scatterplots">Scatterplot
+with Color/Sizing</a></strong>: Visualize 3-4 variables simultaneously
+<ul>
+<li>Color can represent categorical variables</li>
+<li>Size can represent additional quantitative variables</li>
+</ul></li>
+<li><strong>Pairs plots</strong>: Show all pairwise relationships
+between variables</li>
+<li><strong>Residual plots</strong>: Essential for checking model
+assumptions</li>
+</ul>
+<p><strong>What to look for:</strong> - Relationships between Y and each
+X variable - Multicollinearity: Are X variables highly correlated with
+each other? - Patterns in residuals that suggest model improvements</p>
+<p><a href="GraphicalSummaries.html#scatterplots">
+<img class="myhover" src="Images/scatterplotmany.png" alt="Scatterplot" title="Scatterplot with Color and Sizing">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-5" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Analyzing Y with multiple explanatory variables:</strong></p>
+<div id="multiple-linear-regression" class="section level4">
+<h4>Multiple Linear Regression:</h4>
+<ul>
+<li><strong><a href="LinearRegression.html">Multiple Linear
+Regression</a></strong>: Model Y as a function of multiple X variables
+<ul>
+<li>Use when: Want to predict Y using several explanatory variables</li>
+<li>Equation: Y = β₀ + β₁X₁ + β₂X₂ + … + βₖXₖ + ε</li>
+<li>Can include both quantitative and categorical (dummy-coded)
+variables</li>
+<li>Provides adjusted R² to account for number of predictors</li>
+</ul></li>
+</ul>
+<p><strong>Key Concepts:</strong> - <strong>Adjusted R²</strong>: Better
+than R² for comparing models with different numbers of predictors -
+<strong>Multicollinearity</strong>: When X variables are highly
+correlated (problematic!) - Check VIF (Variance Inflation Factor): VIF
+&gt; 10 indicates problems - <strong>Model Selection</strong>: Use AIC,
+BIC, or adjusted R² to compare models - <strong>Interaction
+terms</strong>: Allow effect of one X to depend on another X</p>
+<p><strong>Model Building Strategy:</strong> 1. Start with all
+potentially relevant predictors 2. Check for multicollinearity 3. Remove
+non-significant predictors (or use stepwise selection) 4. Check residual
+plots for violations of assumptions 5. Consider transformations or
+interaction terms if needed</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-7" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/BinomYQuantX.png" width=59px;> <span
+class="tooltipimagetext">Y is a single categorical (qualitative)
+variable of interest where 1 (success) or 0 (failure) are the only
+possible values for Y. This would be like “getting an A in Math 325”
+where 1 means you got an A and 0 means you didn’t. We might use an
+explanatory variable X of “height” to see if taller students are more
+likely to get an A in Math 325 than shorter students. (They aren’t, if
+you were wondering.)</span></p>
+</div>
+<div id="binomial-y-quantitative-x"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Binomial Y | Quantitative X</h2>
+<div id="graphics-6" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics when Y is binary (0/1, success/failure,
+yes/no):</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#scatterplots">Scatterplot
+with Binomial Y</a></strong>: Shows relationship between X and
+probability of success
+<ul>
+<li>Points will be at 0 or 1 on Y-axis</li>
+<li>Add fitted logistic curve to visualize the model</li>
+</ul></li>
+</ul>
+<p><strong>What to look for:</strong> - Does probability of success
+increase or decrease as X increases? - Are there clear patterns or is
+the relationship weak? - Look for outliers or influential points</p>
+<p><a href="GraphicalSummaries.html#scatterplots">
+<img class="myhover" src="Images/scatterplotbinomY.png" alt="Scatterplot with Binomial Y" title="Scatterplot with Binomial Y">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-6" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Analyzing binary outcomes with a quantitative
+predictor:</strong></p>
+<div id="simple-logistic-regression" class="section level4">
+<h4>Simple Logistic Regression:</h4>
+<ul>
+<li><strong><a href="LogisticRegression.html">Simple Logistic
+Regression</a></strong>: Model probability of success as a function of X
+<ul>
+<li>Use when: Y is binary (0/1, success/failure, yes/no)</li>
+<li>Models: log(odds) = β₀ + β₁X</li>
+<li>Produces S-shaped (sigmoid) curve for probabilities</li>
+<li>Coefficients represent change in log-odds per unit change in X</li>
+</ul></li>
+</ul>
+<p><strong>Key Concepts:</strong> - <strong>Odds</strong>: P(success) /
+P(failure) - <strong>Log-Odds (Logit)</strong>: ln(odds) - this is what
+we’re modeling - <strong>Odds Ratio</strong>: exp(β₁) - multiplicative
+change in odds per unit increase in X - OR &gt; 1: Positive relationship
+(X increases → probability increases) - OR &lt; 1: Negative relationship
+(X increases → probability decreases) - OR = 1: No relationship</p>
+<p><strong>Interpretation Example:</strong> If β₁ = 0.5 for X = study
+hours predicting passing exam: - Odds ratio = exp(0.5) = 1.65 - Each
+additional study hour multiplies odds of passing by 1.65</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-8" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/BinomYMultX.png" width=100px;> <span
+class="tooltipimagetext">Y is a single categorical (qualitative)
+variable of interest where 1 (success) or 0 (failure) are the only
+possible values for Y. This would be like “getting an A in Math 325”
+where 1 means you got an A and 0 means you didn’t. We might use an
+explanatory variable X1 of “height” and a second explanatory variable X2
+of “gender” to try to predict whether or not a student will get an A in
+Math 325.</span></p>
+</div>
+<div id="binomial-y-multiple-x"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Binomial Y | Multiple X</h2>
+<div id="graphics-7" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics when Y is binary with multiple
+predictors:</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#scatterplots">Scatterplot
+with Binomial Y and coloring</a></strong>: Visualize multiple variables
+<ul>
+<li>Use color for categorical predictors</li>
+<li>Plot separate curves for different groups</li>
+<li>Can show interaction effects visually</li>
+</ul></li>
+</ul>
+<p><strong>What to look for:</strong> - How does each X variable relate
+to probability of success? - Do effects differ across categorical
+groups? - Are there interaction patterns between predictors?</p>
+<p><a href="GraphicalSummaries.html#scatterplots">
+<img class="myhover" src="Images/scatterplotbinomYmult.png" alt="Scatterplot with Binomial Y" title="Scatterplot with Binomial Y, including coloring and shading">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-7" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Analyzing binary outcomes with multiple
+predictors:</strong></p>
+<div id="multiple-logistic-regression" class="section level4">
+<h4>Multiple Logistic Regression:</h4>
+<ul>
+<li><strong><a href="LogisticRegression.html">Multiple Logistic
+Regression</a></strong>: Model probability using multiple X variables
+<ul>
+<li>Use when: Y is binary and you have multiple predictors</li>
+<li>Models: log(odds) = β₀ + β₁X₁ + β₂X₂ + … + βₖXₖ</li>
+<li>Can include quantitative and categorical predictors</li>
+<li>Can include interaction terms</li>
+</ul></li>
+</ul>
+<p><strong>Key Concepts:</strong> - <strong>Adjusted Odds
+Ratios</strong>: Effect of each predictor controlling for all others -
+<strong>Interaction Terms</strong>: Allow effect of one X to depend on
+another X - <strong>Model Selection</strong>: Use AIC or likelihood
+ratio tests to compare models - <strong>Classification</strong>: Use
+predicted probabilities to classify observations - Common threshold: p
+&gt; 0.5 → predict success</p>
+<p><strong>Model Evaluation:</strong> - <strong>Confusion
+Matrix</strong>: Compare predicted vs. actual classifications -
+<strong>Sensitivity</strong>: P(predict success | actual success) - true
+positive rate - <strong>Specificity</strong>: P(predict failure | actual
+failure) - true negative rate - <strong>ROC Curve</strong>: Plot
+sensitivity vs. (1-specificity) for different thresholds -
+<strong>AUC</strong>: Area Under ROC Curve - overall model performance
+(0.5 = random, 1.0 = perfect)</p>
+<p><strong>Example:</strong> Predicting graduation (yes/no) from GPA,
+attendance, and major</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-9" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<div class="tooltipimage" style="float:left;width:125px;"
+align="center">
+<p><img src="Images/QualYQualX.png" width=59px;> <span
+class="tooltipimagetext">Y is a single categorical variable of interest,
+like gender. X is another categorical variable of interest, like “hair
+color”. This type of data would help us understand if men or women are
+more likely to have certain hair colors than the other
+gender.</span></p>
+</div>
+<div id="categorical-y-categorical-x"
+class="section level2 tabset tabset-pills">
+<h2 class="tabset tabset-pills">Categorical Y | Categorical X</h2>
+<div id="graphics-8" class="section level3">
+<h3>Graphics</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Use these graphics for categorical data:</strong></p>
+<ul>
+<li><strong><a href="GraphicalSummaries.html#bar-charts">Bar
+Charts</a></strong>: Display frequencies or proportions for each
+combination
+<ul>
+<li>Stacked bars show composition</li>
+<li>Side-by-side bars facilitate comparison</li>
+</ul></li>
+<li><strong>Mosaic Plots</strong>: Show proportions with area
+representing frequency</li>
+</ul>
+<p><strong>What to look for:</strong> - Are proportions different across
+groups? - Which combinations are most/least common? - Do patterns
+suggest an association between variables?</p>
+<p><a href="GraphicalSummaries.html#bar-charts">
+<img class="myhover" src="Images/barplot.png" alt="Bar Chart" title="Bar Chart">
+</a></p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+<div id="tests-8" class="section level3">
+<h3>Tests</h3>
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+<p><strong>Testing association between two categorical
+variables:</strong></p>
+<div id="chi-squared-tests" class="section level4">
+<h4>Chi-Squared Tests:</h4>
+<ul>
+<li><strong><a href="ChiSquaredTests.html">Chi-Squared Test of
+Independence</a></strong>: Test if two categorical variables are
+associated
+<ul>
+<li>Use when: Both variables are categorical, independent
+observations</li>
+<li>Tests: H₀: Variables are independent (no association)</li>
+<li>Requires: Expected cell counts ≥ 5 in most cells</li>
+<li>Example: Is there a relationship between gender and major
+choice?</li>
+</ul></li>
+<li><strong><a href="ChiSquaredTests.html">Chi-Squared Goodness of Fit
+Test</a></strong>: Test if observed frequencies match expected
+<ul>
+<li>Use when: One categorical variable, testing against a theoretical
+distribution</li>
+<li>Example: Do students choose majors equally? (test against uniform
+distribution)</li>
+</ul></li>
+</ul>
+</div>
+<div id="alternative-for-small-samples" class="section level4">
+<h4>Alternative for Small Samples:</h4>
+<ul>
+<li><strong><a href="ChiSquaredTests.html">Fisher’s Exact
+Test</a></strong>: Exact test for 2×2 contingency tables
+<ul>
+<li>Use when: Expected cell counts &lt; 5 (chi-squared not
+appropriate)</li>
+<li>Provides exact p-value without relying on chi-squared
+approximation</li>
+<li>Computationally intensive for large samples</li>
+</ul></li>
+</ul>
+<p><strong>Interpreting Results:</strong> - Significant result →
+Variables are associated - Examine <strong>residuals</strong> to see
+which cells differ most from expected - Calculate <strong>relative
+risk</strong> or <strong>odds ratios</strong> for 2×2 tables</p>
+<p><strong>Example:</strong> Testing if smoking status is independent of
+lung cancer diagnosis</p>
+<!--- End of Add content area.  ------------------>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="section-10" class="section level1">
+<h1></h1>
+<div style="clear:both;">
+
+</div>
+<hr />
+<footer>
+</footer>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

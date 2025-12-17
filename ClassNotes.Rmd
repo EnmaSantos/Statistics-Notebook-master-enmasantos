@@ -1,0 +1,127 @@
+---
+title: "ClassNotes"
+output: html_document
+---
+
+```{r, eval=FALSE}
+
+# Create the data:
+set.seed(1140411)
+sample1 <- rnorm(30, 69, 2.5)
+sample2 <- rnorm(30, 69, 2.5)
+theData <- data.frame(values = c(sample1,sample2), group = rep(c(1,2), each=30))
+View(theData)
+boxplot(values ~ group, data = theData)
+
+ 
+
+# Run the permutation test:
+myTest <-  t.test(values ~ group, data = theData, mu = 0)
+observedTestStat <- myTest$statistic
+
+observedTestStat
+
+ 
+
+N <- 2000      
+permutedTestStats <-  rep(NA, N)
+for  (i in 1:N ) {
+   permutedTest <- t.test(sample(values) ~ group, data = theData, mu = 0)
+   permutedTestStats[i]  <-  permutedTest$statistic
+}
+hist(permutedTestStats)
+abline(v=observedTestStat)
+sum(permutedTestStats >= observedTestStat)/N
+sum(permutedTestStats <= observedTestStat)/N
+```
+
+```{r}
+# Create the data:
+set.seed(121)
+sample1 <- rnorm(30, 185, 8)
+sample2 <- sample1 - rnorm(30, 0, 3.5)
+theData <- data.frame(values = c(sample1,sample2), group = rep(c(1,2), each=30), id = rep(c(1:30),times=2))
+View(theData)
+with(theData, hist(values[group==1] - values[group==2]))
+
+# Perform the permutation test:
+# FIX: We select the two groups manually to avoid the "formula" error
+# We compare Group 1 values vs Group 2 values
+myTest <- t.test(theData$values[theData$group==1], 
+                 theData$values[theData$group==2], 
+                 paired = TRUE)
+
+observedTestStat <- myTest$statistic
+
+N <- 2000     
+permutedTestStats <-  rep(NA, N)
+for  (i in 1:N ) {
+   # 1. Shuffle the values column
+   permutedData <- transform(theData, values = sample(values))
+   
+   # 2. Run the paired test on the shuffled data (using the same vector split method)
+   permutedTest <- t.test(permutedData$values[permutedData$group==1], 
+                          permutedData$values[permutedData$group==2], 
+                          paired = TRUE)
+   
+   permutedTestStats[i]  <-  permutedTest$statistic
+}
+hist(permutedTestStats)
+abline(v=observedTestStat)
+
+# --- AUTOMATIC ANSWER CALCULATIONS ---
+cat("observedTestStat =", round(observedTestStat, 4), "\n")
+
+p_greater <- sum(permutedTestStats >= observedTestStat)/N
+cat('"Greater than" p-value =', round(p_greater, 2), "\n")
+
+p_less <- sum(permutedTestStats <= observedTestStat)/N
+cat('"Less than" p-value =', round(p_less, 2), "\n")
+
+p_twosided <- 2 * min(p_greater, p_less)
+p_twosided <- min(p_twosided, 1.0) 
+cat('"Two-sided" p-value =', round(p_twosided, 2), "\n")
+```
+
+```{r}
+library(mosaic)
+# 1. Run the Kruskal-Wallis Test
+# This compares the 'price' distributions across the different 'fuel' groups
+kruskal.test(price ~ fuel, data = SaratogaHouses)
+
+# 2. Get the Median Prices for each group
+# This will tell you which fuel type has the highest median price
+favstats(price ~ fuel, data = SaratogaHouses)
+
+# 3. Create the Visualization
+# Boxplots are the best way to see the difference in distributions
+boxplot(price ~ fuel, data = SaratogaHouses, 
+        main="Home Prices by Fuel Type", 
+        ylab="Price", 
+        col=c("lightblue", "orange", "lightgreen"))
+```
+```{r}
+# ToothGrowth Analysis
+data("ToothGrowth")
+
+# We use Two-Way ANOVA with an interaction term (*)
+# We must wrap 'dose' in factor() so R treats it as categories (0.5, 1, 2) not numbers
+myTest <- aov(len ~ supp * factor(dose), data = ToothGrowth)
+
+summary(myTest)
+```
+
+```{r}
+library(mosaic)
+library(mosaicData)
+
+# RailTrail Analysis
+# We compare cloudcover across the two weekday groups
+# R's default t.test is the Welch test (which handles unequal variances)
+myTest_rail <- t.test(cloudcover ~ weekday, data = RailTrail)
+
+myTest_rail
+```
+
+
+

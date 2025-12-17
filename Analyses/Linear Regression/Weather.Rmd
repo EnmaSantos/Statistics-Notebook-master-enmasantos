@@ -1,0 +1,118 @@
+---
+title: "Weather"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+## Background
+
+This analysis explores the weather patterns between two high-altitude cities: **Hidalgo del Parral, Chihuahua, Mexico** and **Denver, Colorado, USA**. Both cities are elevated urban centers, with Hidalgo del Parral sitting at approximately 1,661 meters (5,449 feet) and Denver at about 1,647 meters (5,404 feet) above sea level—earning Denver its nickname "The Mile High City."
+
+Despite their similar elevations, these cities experience different climates. Hidalgo del Parral has a semi-arid climate with hot summers and mild winters, while Denver experiences a semi-arid continental climate with greater temperature extremes and more pronounced seasonal variations.
+
+**Research Question:** Does the minimum daily temperature effectively predict the maximum daily temperature in these two high-altitude cities, and do these relationships differ between Hidalgo del Parral and Denver?  
+
+```{r, warning=FALSE, message=FALSE}
+library(GSODR)
+load(system.file("extdata", "isd_history.rda", package = "GSODR"))
+```
+
+```{r, eval=FALSE}
+View(isd_history)
+```
+
+```{r}
+hidalgo <- get_GSOD(years = 2023, station = "763230-99999")
+denver <- get_GSOD(years = 2023, station = "725650-03017")
+weather <- rbind(hidalgo, denver)
+```
+
+<!-- Now write up an analysis that studies something like how well the MIN temperature predicts the MAX temperature of the day in the two cities you selected. Of course, you are welcome to do any multiple regression you want with the data, but the recommendation would be to just run a "two-lines" model with the x=MIN, y=MAX, and color of the dots the NAME column. -->
+
+## Analysis
+
+This analysis uses a "two-lines" multiple linear regression model to examine how well the minimum daily temperature (MIN) predicts the maximum daily temperature (MAX) in both Hidalgo and Denver. The model can be expressed as:
+
+$$
+MaxTemp_i = \beta_0 + \beta_1(MinTemp_i) + \beta_2(City_i) + \beta_3(MinTemp_i \times City_i) + \epsilon_i
+$$
+
+where $D_i$ is a dummy variable (1 if Denver, 0 if Hidalgo), and the interaction term $\beta_3 (X_i \times D_i)$ allows for different slopes between the two cities.
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(pander)
+library(car)
+
+weather_model <- lm(MAX ~ MIN * NAME, data = weather)
+
+ggplot(weather, aes(x = MIN, y = MAX, color = NAME)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, fullrange = TRUE) +
+  labs(title = "Maximum vs Minimum Daily Temperature",
+       subtitle = "Comparing Hidalgo, Mexico and Denver, Colorado (2023)",
+       x = "Minimum Temperature (°C)",
+       y = "Maximum Temperature (°C)",
+       color = "City") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  expand_limits(x = 0)
+```
+
+The scatterplot shows the relationship between minimum and maximum daily temperatures for both cities throughout 2023. Each point represents one day's weather, and the fitted lines show the predicted relationship for each city.
+
+### Hypothesis Testing
+
+To determine if the weather patterns truly differ between the two cities, we test two specific components of the regression model: the y-intercepts (baseline temperature) and the interaction term (slopes/rate of change).
+
+**Test for Equal Intercepts (Baseline Temperature)**
+We test if the baseline maximum temperature ($X=0$) differs between the cities.
+* $H_0: \beta_2 = 0$ (There is no difference in the baseline maximum temperature between Denver and Hidalgo).
+* $H_a: \beta_2 \neq 0$ (The baseline temperatures are significantly different).
+
+**Test for Equal Slopes (Temperature Variation)**
+We test if the rate at which maximum temperature rises (relative to minimum temperature) differs between the cities.
+* $H_0: \beta_3 = 0$ (The relationship between Min and Max temp is the same for both cities).
+* $H_a: \beta_3 \neq 0$ (The rate of change in Max temp differs between the two cities).
+
+### Model Summary
+
+```{r}
+weather_summary <- summary(weather_model)
+rownames(weather_summary$coefficients) <- c("Intercept", "Min Temp", "City: Hidalgo", "Interaction (Min Temp x Hidalgo)")
+pander(weather_summary)
+```
+
+### Interpretation
+
+Visually, the scatterplot suggests a distinct difference: the red points (Hidalgo) seem clustered higher than the blue points (Denver) at the lower end of the graph, implying Hidalgo stays warmer. To test if this apparent relationship is statistically significant, we ran a two-lines multiple linear regression.
+
+**The Statistical Evidence:**
+* **Intercepts:** The model confirms our visual intuition. Hidalgo has a significantly higher intercept ($\beta_2 = 4.317, p < 0.001$). This means that when the minimum temperature is $0^\circ C$, Hidalgo is, on average, $4.3^\circ C$ warmer than Denver.
+* **Slopes:** The interaction term is also significant ($\beta_3 = -0.3404, p < 0.001$), confirming that the relationship between minimum and maximum temperatures is not the same for both cities. The value $-0.3404$ represents the difference in slopes: while Denver has a slope of $1.045$, Hidalgo's slope is $0.3404$ lower, resulting in a shallower slope of approximately $0.705$. This means that for every $1^\circ C$ increase in minimum temperature, Hidalgo's maximum only increases by about $0.7^\circ C$, whereas Denver's increases by more than a full degree ($1.045^\circ C$), reflecting its more volatile continental climate.
+
+### Validity of Assumptions
+* **Linearity:** The "Residuals vs Fitted" plot shows a relatively flat red trend line, indicating that the linear assumption is appropriate for this data.
+* **Normality:** The Q-Q plot shows some deviation from the diagonal line at the tails (the ends). This suggests the residuals are not perfectly normally distributed, which is a common limitation in weather data where extreme weather events occur.
+* **Independence:** The "Residuals vs Order" plot shows no clear pattern, suggesting our observations are independent.
+
+```{r, fig.height=3}
+par(mfrow = c(1, 3), cex.main = 0.8)
+
+plot(weather_model, which = 1)
+
+qqPlot(weather_model$residuals, id = FALSE, main = "Normal Q-Q Plot", ylab = "Residuals")
+
+plot(weather_model$residuals, main = "Residuals vs Order",
+     xlab = "Observation Order", ylab = "Residuals")
+abline(h = 0, lty = 2, col = "gray")
+```
+
+### Conclusion
+
+This analysis demonstrates that while minimum temperature is a strong predictor for maximum temperature in both cities ($R^2 = 0.84$), the dynamics differ significantly.
+
+We reject the null hypothesis for equal slopes ($p < 0.001$). This confirms that Denver is more volatile: its thinner atmosphere and continental climate allow for rapid heating and cooling (Slope: 1.045), whereas Hidalgo maintains a more moderate, consistent heat profile (Slope: 0.705). The statistical difference in intercepts ($p < 0.001$) further confirms Hidalgo's consistently warmer baseline.
+

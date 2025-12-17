@@ -1,0 +1,119 @@
+---
+title: "skillQuizWeek4"
+output: html_document
+---
+
+```{r}
+# Load the tidyverse library for access to dplyr functions
+library(tidyverse)
+
+# Filter the CO2 dataset for chilled plants at a concentration of 250
+CO2.chilled.250 <- filter(CO2, Treatment == "chilled" & conc == 250)
+
+# Group the filtered data by 'Type' and then calculate the mean 'uptake' for each group
+mean_values <- CO2.chilled.250 %>%
+  group_by(Type) %>%
+  summarise(mean_uptake = mean(uptake))
+
+# Print the resulting table
+print(mean_values)
+```
+```{r}
+# 1. Load the tidyverse library to get the filter() function
+library(tidyverse)
+
+# 2. Filter the CO2 dataset for chilled plants at a concentration of 250
+# This creates the subset of data we need to plot.
+CO2.chilled.250 <- filter(CO2, Treatment == "chilled" & conc == 250)
+
+# 3. Create the plot
+# We'll use a "dot chart" approach for this categorical data.
+plot(
+  # Provide the data for the x and y axes
+  x = CO2.chilled.250$uptake,
+  y = as.numeric(CO2.chilled.250$Type),
+
+  # Set plot labels and title
+  main = "Quebec shows higher uptake values than Mississippi\nwhen plants are chilled at an ambient CO2 of 250",
+  xlab = "uptake",
+  ylab = "", # No label on the y-axis
+
+  # Customize the points
+  pch = 15, # Use solid squares for the points
+  cex = 1.5, # Make the squares slightly larger
+  col = ifelse(CO2.chilled.250$Type == "Quebec", "skyblue", "red"), # Color points by Type
+
+  # Customize the axes
+  ylim = c(0.5, 2.5), # Set limits for the y-axis to provide space
+  yaxt = "n" # Do not draw the default y-axis (we'll add custom labels)
+)
+
+# 4. Add custom y-axis labels
+# This adds the text "Quebec" and "Mississippi" at the right positions.
+axis(
+  side = 2, # Specify the left-hand side axis
+  at = c(1, 2), # The numeric positions for the labels
+  labels = c("Quebec", "Mississippi"), # The text for the labels
+  las = 1 # Make the labels horizontal
+)
+
+```
+```{r}
+# First, create the filtered dataset
+library(tidyverse)
+library(car)
+
+CO2.chilled.250 <- filter(CO2, Treatment == "chilled" & conc == 250)
+
+# Create the Q-Q plots (this will show A and B visually)
+qqPlot(uptake ~ Type, data = CO2.chilled.250)
+
+# To find the actual values A and B:
+# A and B are the y-axis labels shown in the Q-Q plot
+# They represent the range of the uptake values
+
+# View the uptake values by Type
+CO2.chilled.250 %>% 
+  group_by(Type) %>%
+  arrange(uptake)
+
+# Or more directly, get the min and max uptake values
+range(CO2.chilled.250$uptake)
+
+# To see exactly which values correspond to A and B:
+# A is approximately the maximum uptake value
+# B is approximately the minimum uptake value
+max(CO2.chilled.250$uptake)  # This should be around 60
+min(CO2.chilled.250$uptake)  # This should be around 54
+
+# Or view all uptake values sorted
+sort(CO2.chilled.250$uptake)
+
+```
+```{r}
+library(tidyverse)
+library(car)
+
+CO2.chilled.250 <- filter(CO2, Treatment == "chilled" & conc == 250)
+
+# The qqPlot function returns the row indices of potential outliers
+# Run the plot and capture the output
+outlier_rows <- qqPlot(uptake ~ Type, data = CO2.chilled.250)
+
+# A and B are the row numbers shown in the plots
+# To find them, look at the row names of the filtered data
+rownames(CO2.chilled.250)
+
+# Or to see which original CO2 rows correspond to each point:
+CO2.chilled.250 <- CO2 %>% 
+  mutate(original_row = row_number()) %>%
+  filter(Treatment == "chilled" & conc == 250)
+
+View(CO2.chilled.250)
+```
+```{r}
+CO2.chilled.250$uptake[3]
+CO2.chilled.250$uptake[5] 
+```
+
+

@@ -1,0 +1,98 @@
+---
+title: "LinearClassActivity"
+output: html_document
+---
+
+```{r}
+# Load the built-in mtcars dataset
+data(mtcars)
+
+# 1. --- Prepare the Data ---
+# To make plotting and modeling easier, let's convert 'am'
+# (0 = automatic, 1 = manual) into a factor variable with labels.
+mtcars$am_factor <- factor(mtcars$am,
+  levels = c(0, 1),
+  labels = c("automatic", "manual")
+)
+
+# 2. --- Recreate the Plot ---
+
+# Define the colors to match the image
+colors <- ifelse(mtcars$am_factor == "automatic", "skyblue", "darkred")
+
+# Create the basic scatterplot
+plot(mpg ~ qsec,
+  data = mtcars,
+  main = "1974 Motor Trend Cars",
+  xlab = "qsec",
+  ylab = "mpg",
+  col = colors, # Use our defined colors
+  pch = 16 # Use solid circles
+)
+
+# Add the legend
+legend("topright",
+  legend = c("automatic", "manual"),
+  col = c("skyblue", "darkred"),
+  pch = 16,
+  title = "Transmission (am)"
+)
+
+# 3. --- Perform the Multiple Linear Regression ---
+
+# To get two separate lines (different slopes and intercepts) from ONE model,
+# we must use an interaction term.
+#
+# The model Y = B0 + B1*qsec + B2*am_manual + B3*qsec*am_manual
+# is written in R as:
+model <- lm(mpg ~ qsec * am_factor, data = mtcars)
+
+# You can view the full summary to check for significance (Task 5 & 6)
+# summary(model)
+#
+# Look at the p-value for 'qsec:am_factormanual' to see if slopes are different.
+# Look at the p-value for 'am_factormanual' to see if intercepts are different.
+
+# 4. --- Get Slopes and Intercepts for Each Line ---
+
+# Get the table of coefficients from the model
+coeffs <- coef(model)
+
+# --- Line for Automatic (am = 0, the 'base' level) ---
+# The model is: mpg = B0 + B1*qsec
+# 'am_factormanual' and 'qsec:am_factormanual' terms are 0.
+intercept_auto <- coeffs["(Intercept)"]
+slope_auto <- coeffs["qsec"]
+
+# --- Line for Manual (am = 1, the 'manual' level) ---
+# The model is: mpg = (B0 + B2) + (B1 + B3)*qsec
+intercept_manual <- coeffs["(Intercept)"] + coeffs["am_factormanual"]
+slope_manual <- coeffs["qsec"] + coeffs["qsec:am_factormanual"]
+
+# 5. --- Print the Values to Fill in the Blanks ---
+
+cat("--- Line for Automatic Transmission Vehicles ---\n")
+cat("Intercept =", intercept_auto, "\n")
+cat("Slope =", slope_auto, "\n\n")
+
+cat("--- Line for Manual Transmission Vehicles ---\n")
+cat("Intercept =", intercept_manual, "\n")
+cat("Slope =", slope_manual, "\n")
+
+
+# 6. --- Add the Calculated Lines to the Plot ---
+
+# Add the line for automatic vehicles
+abline(a = intercept_auto, b = slope_auto, col = "skyblue", lwd = 2)
+
+# Add the line for manual vehicles
+abline(a = intercept_manual, b = slope_manual, col = "darkred", lwd = 2)
+
+
+# 7. --- Model Diagnostics (Task 5) ---
+# To check if the regression was appropriate, view the diagnostic plots:
+# par(mfrow = c(2, 2)) # Sets up a 2x2 grid for plots
+# plot(model)
+# par(mfrow = c(1, 1)) # Resets plot layout
+```
+

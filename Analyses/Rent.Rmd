@@ -1,0 +1,107 @@
+---
+title: "Rent"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+<!-- Welcome to the first Analysis for Math 325! 
+The goal of this first assignment is to have you produce a graphical summary and a numerical summary of the "Rent" data set. The fun part is that you get to decide what type of graph and what type of numerical summary to create! You will need to read through the "green text" instructions of this document to find the places where you are supposed to enter R-code in order to complete the assignment. -->
+
+
+**Week 1 Analysis**
+
+```{r, message=FALSE, warning=FALSE}
+# This gray area is called an "R-chunk". 
+# These library commands install some powerful functions for your use later on.
+library(mosaic)
+library(pander)
+library(tidyverse)
+library(DT) 
+
+# This read_csv command reads in the "Rent" data set into an object called "Rent"
+Rent <- read_csv("../Data/rent.csv")
+
+# To load this data set into your R-Console do the following:
+#  1. From your top file menu select "Session -> Set Working Directory -> To Source File Location"
+#  2. Press the green "play button" in the top right corner of this gray box (which is called an "R-chunk").
+#  3. Then in your "Console" window run View(Rent)
+```
+
+<br />
+
+## Background
+
+Here is a data table showing the available approved housing apartment options at BYU-Idaho for single students. 
+
+```{r, warning=FALSE}
+# Code to get you started. 
+# View(...) works great in the Console, but datatable(...) must be
+# used instead within an R-chunk.
+datatable(Rent, options=list(lengthMenu = c(3,10,30)), extensions="Responsive")
+```
+## Exploration chunk
+
+
+## Graphic
+
+<!-- Present an interesting graphic using the Rent data set. Do not create the same graphics that are shown in the [Good Example Analysis](./Analyses/StudentHousing.html), but you can certainly use those graphics as a guide to inspire you on what to do yourself. -->
+
+
+```{r}
+# Use this R-chunk to...
+# ...Create an interesting graphic using the Rent data set.
+
+Rent_Filtered <- Rent %>%
+  mutate(Price_Avg = (`Price Low` + `Price High` ) / 2 ) %>%
+  filter(`Housing Type` %in% c("Approved Men's Housing", "Approved Women's Housing"))
+
+ggplot(Rent_Filtered, aes(x = `Housing Type`, y = Price_Avg, fill = `Housing Type`)) +
+  geom_boxplot() +
+  labs(
+    title = "Comparison of Housing Prices by Gender",
+    x = "Housing Type",
+    y = "Average Semester Rent ($)", 
+    fill = "Housing Type"
+  ) + 
+  theme_minimal()+
+  scale_y_continuous(labels = scales::dollar)
+```
+
+
+<!-- Write a few statements here that explain your graphic and what it shows. -->
+
+The box plot reveals a distinct trend where approved women's housing is generally more expensive per semester than approved men's housing. This is evidenced by the higher median price for women's apartments and the upward shift of their entire central 50% price range. Although the absolute cheapest and most expensive options are similar for both, the data indicates that the typical student seeking women's housing should expect to pay more.
+
+
+
+
+```{r}
+# Use this R-chunk to...
+# ...compute and display a meaningful table of numerical summaries supporting your above graphic.
+Rent_Filtered %>%
+  group_by(`Housing Type`) %>%
+  summarise(
+    Count = n(),
+    Mean_Price = mean(Price_Avg, na.rm = TRUE),
+    Median_Price = median(Price_Avg, na.rm = TRUE)
+  ) %>%
+  pander()
+
+```
+
+<!-- Write a few statements here that introduce your table of numerical summaries and what they show. -->
+
+This table of numerical summaries provides quantitative validation for the trends observed in the box plot. The data, compiled from 55 men's and 52 women's housing complexes, shows a clear price difference between the two categories. Specifically, the mean rent for women's housing at $1,473 and the median rent at $1,500 are substantially higher than the corresponding figures for men's housing, which are $1,405 and $1,425, respectively.
+
+
+## Conclusion
+In conclusion, this analysis clearly answers the main question: women's approved housing is more expensive than men's. Both the box plot graph and the summary table support this, showing that the average and middle prices are higher for women. Therefore, a student looking for women's housing in the area should plan to budget more for rent each semester.
+
+
+
+
+

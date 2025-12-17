@@ -1,0 +1,745 @@
+---
+title: "Statistics Notebook"
+---
+
+<!-- You can delete the following copyright statement if you wish: -->
+
+<div style="color:gray;"><!-- Code to change the following paragraphs to gray text -->
+
+This page, and all pages of this notebook, are meant to be customized to become a useful *Guide to Statistical Analysis* in R for your *current* and *future* self. 
+
+<div style="font-size:.8em;"><!-- Code to shrink font-size of following paragraph -->
+
+To begin customizing, [download](https://github.com/saundersg/Statistics-Notebook) your own copy of the book <span style="font-size:.8em;">(if you haven't already)</span>. Please note the [GNU General Public License](https://choosealicense.com/licenses/gpl-3.0/) when downloading. You are free to delete this commentary in your own copy of the notebook.
+
+</div><!-- Ends smaller font-size section -->
+
+</div><!-- End gray text section -->
+
+<!-- End of download and copyright instructions. -->
+
+
+## Table of Contents 
+
+
+<!-- This is how to comment text out. You can comment out the above instructions if you wish. Comments allow the text to remain in the Rmd file, but not be displayed in the html file. -->
+
+## {.tabset .tabset-fade}
+
+### Hide 
+
+### Show Notes
+
+<!-- This is a great place to add general notes, then "Knit" the file to have your notes show up in your Statistics-Notebook. --------------- -->
+
+## Quick Reference Guide
+
+### **Choosing the Right Statistical Test**
+
+**Step 1:** Identify your response variable (Y)
+- Is it **Quantitative** (numbers that can be averaged)? → Go to quantitative tests
+- Is it **Categorical** (groups/categories)? → Go to categorical tests
+
+**Step 2:** Identify your explanatory variable(s) (X)
+- **None** (just one variable)? → Single variable tests
+- **Categorical** X? → Comparison tests (t-tests, ANOVA, Chi-squared)
+- **Quantitative** X? → Regression or correlation
+- **Multiple** X variables? → Multiple regression or factorial designs
+
+**Step 3:** Check assumptions
+- **Normality**: If data is normally distributed → parametric tests (t-test, ANOVA, regression)
+- **Non-normal**: If data violates normality → non-parametric tests (Wilcoxon, Kruskal-Wallis, Mann-Whitney)
+- **Sample size**: Small samples (<30) → be extra careful with normality assumptions
+
+### **Key Reminders**
+
+<span style="color:darkred;">**Always plot your data first!**</span> Graphics reveal patterns, outliers, and violations of assumptions.
+
+<span style="color:darkblue;">**Check assumptions before testing:**</span>
+- Normality (Q-Q plots, histograms)
+- Equal variance (side-by-side boxplots)
+- Independence of observations
+
+<span style="color:darkgreen;">**Interpret p-values carefully:**</span>
+- p < 0.05: Evidence against null hypothesis (statistically significant)
+- p ≥ 0.05: Insufficient evidence to reject null hypothesis
+
+### **Helpful Links**
+- [R Markdown Customization Help](RMarkdownHints.html)
+- [R Commands Reference](RCommands.html)
+- [Making Inference](MakingInference.html)
+- [Permutation Tests](PermutationTests.html)
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- End your notes before here. ------------------------------------- -->
+##
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QuantY.png" width=35px;>
+  <span class="tooltipimagetext">Y is a single quantitative variable of interest. This would be like "heights" of BYU-Idaho students.</span>
+</div>
+
+## One Quantitative Response Variable Y {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics to visualize the distribution of a single quantitative variable:**
+
+- **[Histogram](GraphicalSummaries.html#histogram)**: Shows the shape of the distribution (normal, skewed, etc.)
+- **[Boxplot](GraphicalSummaries.html#boxplots)**: Identifies outliers and shows five-number summary
+- **[Dot Plot](GraphicalSummaries.html#dot-plots)**: Good for smaller datasets to see individual observations
+
+**What to look for:** Check for normality, outliers, and whether the data is symmetric or skewed.
+
+<a href="GraphicalSummaries.html#histogram">
+  <img class="myhover" src="./Images/histogram.png" alt="Histogram" title="Histogram">
+</a>
+<a href="GraphicalSummaries.html#dot-plots">
+  <img class="myhover" src="./Images/dotplotsingle.png" alt="Dot Plot" title="Dot Plot">
+</a>
+<a href="GraphicalSummaries.html#boxplots">
+  <img class="myhover" src="./Images/boxplotsingle.png" alt="Boxplot" title="Boxplot">
+</a>
+
+
+
+<!--- End your notes before here.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Testing one quantitative variable (comparing to a hypothesized value):**
+
+#### Parametric Tests (assume normality):
+- **[One Sample t Test](tTests.html)**: Test if the mean equals a specific value
+  - Use when: Data is approximately normal OR sample size is large (n > 30)
+  - Example: Is the average temperature different from 72°F?
+
+#### Non-Parametric Tests (no normality assumption):
+- **[Wilcoxon Signed-Rank Test](WilcoxonTests.html)**: Test if the median equals a specific value
+  - Use when: Data is NOT normal AND sample size is small
+  - More robust to outliers
+
+#### Descriptive Statistics:
+- **[Numerical Summaries](NumericalSummaries.html)**: Mean, median, standard deviation, five-number summary
+  - Always calculate these first!
+  - Compare mean vs. median to check for skewness
+
+**Quick Tip:** If mean ≈ median, data is likely symmetric. If mean > median, data is right-skewed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+
+
+#
+<div style="clear:both;"></div>
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QuantYQualXg2.png" width=59px;>
+  <span class="tooltipimagetext">Y is a single quantitative variable of interest. This would be like "heights" of BYU-Idaho students. X is a qualitative (categorical) variable of interest like "gender" that has just two groups "A" and "B". So this logo represents situtations where we would want to compare heights of male (group A) and female (group B) students.</span>
+</div>
+
+## Quantitative Y | Categorical X (2 Groups) {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics to compare two groups:**
+
+- **[Side-by-side Boxplots](GraphicalSummaries.html#boxplots)**: Best for comparing distributions and checking equal variance
+- **[Side-by-side Dot Plots](GraphicalSummaries.html#dot-plots)**: Shows individual data points for each group
+
+**What to look for:** 
+- Do the groups have similar spread (variance)?
+- Are there outliers in either group?
+- Do both groups appear normally distributed?
+
+<a href="GraphicalSummaries.html#boxplots">
+  <img class="myhover" src="./Images/boxplot.png" alt="Side-by-side Boxplots" title="Side-by-side Boxplots">
+</a>
+<a href="GraphicalSummaries.html#dot-plots">
+  <img class="myhover" src="./Images/dotplotdouble.png" alt="Dot Plot" title="Side-by-side Dot Plots">
+</a>
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Comparing two groups:**
+
+#### For Independent Groups (different subjects in each group):
+- **[Independent Samples t Test](tTests.html)**: Compare means of two independent groups
+  - Use when: Data is normal, independent observations, roughly equal variances
+  - Example: Compare heights of males vs. females
+  
+- **[Mann-Whitney (Wilcoxon Rank Sum) Test](WilcoxonTests.html)**: Compare distributions of two independent groups
+  - Use when: Data is NOT normal OR has outliers
+  - Non-parametric alternative to independent t-test
+
+#### For Paired/Dependent Groups (same subjects measured twice):
+- **[Paired t Test](tTests.html)**: Compare means of paired observations
+  - Use when: Before/after measurements, matched pairs
+  - Example: Compare test scores before and after tutoring (same students)
+  
+- **[Wilcoxon Signed-Rank Test](WilcoxonTests.html)**: Non-parametric version of paired t-test
+  - Use when: Paired data is NOT normal
+
+**Key Decision:** Are the groups independent or paired? This determines which test to use!
+
+
+
+
+
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+
+
+
+
+##
+<div style="clear:both;"></div>
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QuantYQualXg3plus.png" width=59px;>
+  <span class="tooltipimagetext">Y is a single quantitative variable of interest, like "heights" of BYU-Idaho students. X is a categorical (qualitative) variable like which Math 221 you took, 221A, 221B, or 221C. In other words, X has three or more groups. So "Classrank" could be X, with groups "Freshman", "Sophomore", "Junior", and "Senior".</span>
+</div>
+
+## Quantitative Y | Categorical X (3+ Groups) {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics to compare three or more groups:**
+
+- **[Side-by-side Boxplots](GraphicalSummaries.html#boxplots)**: Best for comparing multiple group distributions simultaneously
+- **[Side-by-side Dot Plots](GraphicalSummaries.html#dot-plots)**: Shows all individual observations across groups
+
+**What to look for:**
+- Do all groups have similar spreads (homogeneity of variance)?
+- Which group(s) appear different from the others?
+- Are there outliers in any group?
+
+<a href="GraphicalSummaries.html#boxplots">
+  <img class="myhover" src="./Images/boxplotthree.png" alt="Side-by-side Boxplots" title="Side-by-side Boxplots 3+ Groups">
+</a>
+<a href="GraphicalSummaries.html#dot-plots">
+  <img class="myhover" src="./Images/dotplottriple.png" alt="Side-by-side Dot Plots" title="Side-by-side Dot Plots 3+ Groups">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Comparing three or more groups:**
+
+#### Parametric Test:
+- **[One-Way ANOVA](ANOVA.html)**: Compare means across 3+ groups
+  - Use when: Data is normal in each group, equal variances across groups
+  - Example: Compare test scores across Freshman, Sophomore, Junior, Senior
+  - Tests if **at least one** group mean is different (doesn't tell you which)
+  - Follow up with post-hoc tests (Tukey, Bonferroni) to identify which groups differ
+
+#### Non-Parametric Alternative:
+- **[Kruskal-Wallis Test](Kruskal.html)**: Compare distributions across 3+ groups
+  - Use when: Data violates normality OR has outliers
+  - Non-parametric alternative to ANOVA
+  - More robust to violations of assumptions
+
+**Important:** ANOVA/Kruskal-Wallis only tell you if groups differ overall. You need follow-up tests to determine which specific groups are different from each other.
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+
+
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QuantYMultQualX.png" width=80px;>
+  <span class="tooltipimagetext">Y is a single quantitative variable of interest, like "heights" of BYU-Idaho students. X1 is a categorical (qualitative) variable like gender, with levels "boy" and "girl." X2 is another categorical (qualitative) variable like "Classrank" with levels "Freshman", "Sophomore", and "Junior". Of course, both X1 and X2 can have as many levels as you want to work with, but must have at least two levels each.</span>
+</div>
+
+## Quantitative Y | Multiple Categorical X {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics when you have multiple categorical explanatory variables:**
+
+- **[Side-by-side Boxplots](GraphicalSummaries.html#boxplots)**: Create separate plots for each combination of factors
+- **Interaction Plots**: Show how the effect of one factor depends on the level of another factor
+
+**What to look for:**
+- Are the patterns consistent across factor combinations?
+- Do you see interaction effects (non-parallel lines in interaction plots)?
+- Are there outliers in any combination of groups?
+
+<a href="GraphicalSummaries.html#boxplots">
+  <img class="myhover" src="./Images/boxplotthree.png" alt="Side-by-side Boxplots" title="Side-by-side Boxplots 3+ Groups">
+</a>
+<a href="GraphicalSummaries.html#dot-plots">
+  <img class="myhover" src="./Images/dotplottriple.png" alt="Side-by-side Dot Plots" title="Side-by-side Dot Plots 3+ Groups">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Analyzing effects of multiple categorical variables:**
+
+#### Factorial ANOVA:
+- **[Two-Way ANOVA](ANOVA.html)**: Analyze effects of 2+ categorical variables simultaneously
+  - Use when: Data is normal, equal variances, independent observations
+  - Tests:
+    - **Main effects**: Does each factor influence Y independently?
+    - **Interaction effects**: Does the effect of one factor depend on the other factor?
+  - Example: Test effect of Gender AND Major on GPA
+
+**Key Concepts:**
+- **Main Effect**: The individual effect of each factor, ignoring the other factors
+- **Interaction Effect**: When the effect of one factor changes depending on the level of another factor
+- If interaction is significant, focus on that rather than main effects
+
+**Example:** If studying effect of teaching method AND class time on test scores, an interaction would mean that morning classes benefit more from one teaching method while evening classes benefit more from another.
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QuantYQuantX.png" width=59px;>
+  <span class="tooltipimagetext">Y is a single quantitative variable of interest, like "height". X is another single quantitative variable of interest, like "shoe-size". This would imply we are using "shoe-size" (X) to explain "height" (Y).</span>
+</div>
+
+## Quantitative Y | Quantitative X {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics to examine the relationship between two quantitative variables:**
+
+- **[Scatterplot](GraphicalSummaries.html#scatterplots)**: Essential for visualizing the relationship
+  - Shows pattern, strength, and direction of relationship
+  - Reveals outliers and influential points
+
+**What to look for:**
+- **Linear or curved** relationship?
+- **Positive or negative** relationship?
+- **Strong or weak** relationship?
+- Any **outliers** or unusual patterns?
+- Is the spread **constant** across X values (homoscedasticity)?
+
+<a href="GraphicalSummaries.html#scatterplots">
+  <img class="myhover" src="./Images/scatterplot.png" alt="Scatterplot" title="Scatterplot">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Analyzing the relationship between two quantitative variables:**
+
+#### Simple Linear Regression:
+- **[Simple Linear Regression](LinearRegression.html)**: Model Y as a linear function of X
+  - Use when: Relationship appears linear, residuals are normal, constant variance
+  - Equation: Y = β₀ + β₁X + ε
+  - Tests whether slope (β₁) is significantly different from zero
+  - Provides R² (proportion of variance explained)
+
+#### Correlation:
+- **Pearson Correlation (r)**: Measures strength and direction of linear relationship
+  - Range: -1 to +1
+  - r = 0: No linear relationship
+  - r = ±1: Perfect linear relationship
+  - Use when: Both variables are approximately normal
+
+**Important Regression Assumptions:**
+1. **Linearity**: Relationship is linear (check scatterplot)
+2. **Independence**: Observations are independent
+3. **Normality**: Residuals are normally distributed (check Q-Q plot)
+4. **Equal variance**: Spread of residuals is constant (check residuals vs. fitted plot)
+
+**Remember:** Correlation does NOT imply causation!
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QuantYMultX.png" width=100px;>
+  <span class="tooltipimagetext">Y is a single quantitative variable of interest, like height. While we could use an X1 of "shoe-size" to explain height, we might also want to use a second x-variable, X2, like "gender" to help explain height. Further x-variables could also be used.</span>
+</div>
+
+## Quantitative Y | Multiple X {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics when you have multiple explanatory variables:**
+
+- **[Scatterplot with Color/Sizing](GraphicalSummaries.html#scatterplots)**: Visualize 3-4 variables simultaneously
+  - Color can represent categorical variables
+  - Size can represent additional quantitative variables
+- **Pairs plots**: Show all pairwise relationships between variables
+- **Residual plots**: Essential for checking model assumptions
+
+**What to look for:**
+- Relationships between Y and each X variable
+- Multicollinearity: Are X variables highly correlated with each other?
+- Patterns in residuals that suggest model improvements
+
+<a href="GraphicalSummaries.html#scatterplots">
+  <img class="myhover" src="./Images/scatterplotmany.png" alt="Scatterplot" title="Scatterplot with Color and Sizing">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Analyzing Y with multiple explanatory variables:**
+
+#### Multiple Linear Regression:
+- **[Multiple Linear Regression](LinearRegression.html)**: Model Y as a function of multiple X variables
+  - Use when: Want to predict Y using several explanatory variables
+  - Equation: Y = β₀ + β₁X₁ + β₂X₂ + ... + βₖXₖ + ε
+  - Can include both quantitative and categorical (dummy-coded) variables
+  - Provides adjusted R² to account for number of predictors
+
+**Key Concepts:**
+- **Adjusted R²**: Better than R² for comparing models with different numbers of predictors
+- **Multicollinearity**: When X variables are highly correlated (problematic!)
+  - Check VIF (Variance Inflation Factor): VIF > 10 indicates problems
+- **Model Selection**: Use AIC, BIC, or adjusted R² to compare models
+- **Interaction terms**: Allow effect of one X to depend on another X
+
+**Model Building Strategy:**
+1. Start with all potentially relevant predictors
+2. Check for multicollinearity
+3. Remove non-significant predictors (or use stepwise selection)
+4. Check residual plots for violations of assumptions
+5. Consider transformations or interaction terms if needed
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/BinomYQuantX.png" width=59px;>
+  <span class="tooltipimagetext">Y is a single categorical (qualitative) variable of interest where 1 (success) or 0 (failure) are the only possible values for Y. This would be like "getting an A in Math 325" where 1 means you got an A and 0 means you didn't. We might use an explanatory variable X of "height" to see if taller students are more likely to get an A in Math 325 than shorter students. (They aren't, if you were wondering.)</span>
+</div>
+
+## Binomial Y | Quantitative X {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics when Y is binary (0/1, success/failure, yes/no):**
+
+- **[Scatterplot with Binomial Y](GraphicalSummaries.html#scatterplots)**: Shows relationship between X and probability of success
+  - Points will be at 0 or 1 on Y-axis
+  - Add fitted logistic curve to visualize the model
+  
+**What to look for:**
+- Does probability of success increase or decrease as X increases?
+- Are there clear patterns or is the relationship weak?
+- Look for outliers or influential points
+
+<a href="GraphicalSummaries.html#scatterplots">
+  <img class="myhover" src="./Images/scatterplotbinomY.png" alt="Scatterplot with Binomial Y" title="Scatterplot with Binomial Y">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Analyzing binary outcomes with a quantitative predictor:**
+
+#### Simple Logistic Regression:
+- **[Simple Logistic Regression](LogisticRegression.html)**: Model probability of success as a function of X
+  - Use when: Y is binary (0/1, success/failure, yes/no)
+  - Models: log(odds) = β₀ + β₁X
+  - Produces S-shaped (sigmoid) curve for probabilities
+  - Coefficients represent change in log-odds per unit change in X
+
+**Key Concepts:**
+- **Odds**: P(success) / P(failure)
+- **Log-Odds (Logit)**: ln(odds) - this is what we're modeling
+- **Odds Ratio**: exp(β₁) - multiplicative change in odds per unit increase in X
+  - OR > 1: Positive relationship (X increases → probability increases)
+  - OR < 1: Negative relationship (X increases → probability decreases)
+  - OR = 1: No relationship
+
+**Interpretation Example:** 
+If β₁ = 0.5 for X = study hours predicting passing exam:
+- Odds ratio = exp(0.5) = 1.65
+- Each additional study hour multiplies odds of passing by 1.65
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/BinomYMultX.png" width=100px;>
+  <span class="tooltipimagetext">Y is a single categorical (qualitative) variable of interest where 1 (success) or 0 (failure) are the only possible values for Y. This would be like "getting an A in Math 325" where 1 means you got an A and 0 means you didn't. We might use an explanatory variable X1 of "height" and a second explanatory variable X2 of "gender" to try to predict whether or not a student will get an A in Math 325.</span>
+</div>
+
+## Binomial Y | Multiple X {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics when Y is binary with multiple predictors:**
+
+- **[Scatterplot with Binomial Y and coloring](GraphicalSummaries.html#scatterplots)**: Visualize multiple variables
+  - Use color for categorical predictors
+  - Plot separate curves for different groups
+  - Can show interaction effects visually
+
+**What to look for:**
+- How does each X variable relate to probability of success?
+- Do effects differ across categorical groups?
+- Are there interaction patterns between predictors?
+
+<a href="GraphicalSummaries.html#scatterplots">
+  <img class="myhover" src="./Images/scatterplotbinomYmult.png" alt="Scatterplot with Binomial Y" title="Scatterplot with Binomial Y, including coloring and shading">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Analyzing binary outcomes with multiple predictors:**
+
+#### Multiple Logistic Regression:
+- **[Multiple Logistic Regression](LogisticRegression.html)**: Model probability using multiple X variables
+  - Use when: Y is binary and you have multiple predictors
+  - Models: log(odds) = β₀ + β₁X₁ + β₂X₂ + ... + βₖXₖ
+  - Can include quantitative and categorical predictors
+  - Can include interaction terms
+
+**Key Concepts:**
+- **Adjusted Odds Ratios**: Effect of each predictor controlling for all others
+- **Interaction Terms**: Allow effect of one X to depend on another X
+- **Model Selection**: Use AIC or likelihood ratio tests to compare models
+- **Classification**: Use predicted probabilities to classify observations
+  - Common threshold: p > 0.5 → predict success
+
+**Model Evaluation:**
+- **Confusion Matrix**: Compare predicted vs. actual classifications
+- **Sensitivity**: P(predict success | actual success) - true positive rate
+- **Specificity**: P(predict failure | actual failure) - true negative rate
+- **ROC Curve**: Plot sensitivity vs. (1-specificity) for different thresholds
+- **AUC**: Area Under ROC Curve - overall model performance (0.5 = random, 1.0 = perfect)
+
+**Example:** Predicting graduation (yes/no) from GPA, attendance, and major
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+<div style="float:left;width:125px;" align=center class="tooltipimage">
+<img src="./Images/QualYQualX.png" width=59px;>
+  <span class="tooltipimagetext">Y is a single categorical variable of interest, like gender. X is another categorical variable of interest, like "hair color". This type of data would help us understand if men or women are more likely to have certain hair colors than the other gender.</span>
+</div>
+
+## Categorical Y | Categorical X {.tabset .tabset-pills}
+
+### Graphics
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Use these graphics for categorical data:**
+
+- **[Bar Charts](GraphicalSummaries.html#bar-charts)**: Display frequencies or proportions for each combination
+  - Stacked bars show composition
+  - Side-by-side bars facilitate comparison
+- **Mosaic Plots**: Show proportions with area representing frequency
+
+**What to look for:**
+- Are proportions different across groups?
+- Which combinations are most/least common?
+- Do patterns suggest an association between variables?
+
+<a href="GraphicalSummaries.html#bar-charts">
+  <img class="myhover" src="./Images/barplot.png" alt="Bar Chart" title="Bar Chart">
+</a>
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+### Tests
+<div style="padding-left:125px;color:lightgray;">
+<!-- Add your customizations in the area below: -->
+
+**Testing association between two categorical variables:**
+
+#### Chi-Squared Tests:
+- **[Chi-Squared Test of Independence](ChiSquaredTests.html)**: Test if two categorical variables are associated
+  - Use when: Both variables are categorical, independent observations
+  - Tests: H₀: Variables are independent (no association)
+  - Requires: Expected cell counts ≥ 5 in most cells
+  - Example: Is there a relationship between gender and major choice?
+
+- **[Chi-Squared Goodness of Fit Test](ChiSquaredTests.html)**: Test if observed frequencies match expected
+  - Use when: One categorical variable, testing against a theoretical distribution
+  - Example: Do students choose majors equally? (test against uniform distribution)
+
+#### Alternative for Small Samples:
+- **[Fisher's Exact Test](ChiSquaredTests.html)**: Exact test for 2×2 contingency tables
+  - Use when: Expected cell counts < 5 (chi-squared not appropriate)
+  - Provides exact p-value without relying on chi-squared approximation
+  - Computationally intensive for large samples
+
+**Interpreting Results:**
+- Significant result → Variables are associated
+- Examine **residuals** to see which cells differ most from expected
+- Calculate **relative risk** or **odds ratios** for 2×2 tables
+
+**Example:** Testing if smoking status is independent of lung cancer diagnosis
+
+
+
+
+
+
+<!--- End of Add content area.  ------------------>
+</div>
+
+#
+<div style="clear:both;"></div>
+
+----
+
+<footer></footer>
+

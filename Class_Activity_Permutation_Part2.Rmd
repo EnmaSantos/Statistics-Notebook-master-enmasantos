@@ -1,0 +1,142 @@
+---
+title: "Class Activity - Permutation Testing (Part 2)"
+author: "Enmanuel De Los Santos Cruz"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load necessary libraries
+# You may need to install 'mosaic' if you haven't: install.packages("mosaic")
+library(ggplot2) # for diamonds dataset
+library(mosaic)  # for SAT dataset
+```
+
+## Question 1 & 2: Independent Two-Sample t-Test (mtcars)
+
+We need to test if the average weight (`wt`) of 4-cylinder cars differs from 8-cylinder cars.
+
+```{r q1_mtcars}
+# Filter dataset for only 4 and 8 cylinders
+mtcars_sub <- subset(mtcars, cyl %in% c(4, 8))
+
+# Step 1: Initial Test
+# Run t-test: weight ~ cylinders
+myTest <- t.test(wt ~ cyl, data = mtcars_sub)
+observedTestStat <- myTest$statistic
+
+# Output the statistic for Question 2
+cat("Question 2 - Observed Test Statistic:", round(observedTestStat, 2), "\n")
+
+# Step 2: Permutation Loop
+set.seed(123) # For reproducibility
+N <- 2000
+permutedTestStats <- rep(NA, N)
+
+for (i in 1:N) {
+  # Permute the cylinder labels
+  permutedData <- mtcars_sub
+  permutedData$cyl <- sample(permutedData$cyl)
+  
+  # Run test on permuted data
+  permutedTest <- t.test(wt ~ cyl, data = permutedData)
+  permutedTestStats[i] <- permutedTest$statistic
+}
+
+# Histogram
+hist(permutedTestStats, main="Permutation Dist (mtcars)", xlab="t-statistic")
+abline(v=observedTestStat, col="red", lwd=2)
+
+# Step 3: P-value
+cat("P(>= observed):", sum(permutedTestStats >= observedTestStat)/N, "\n")
+cat("P(<= observed):", sum(permutedTestStats <= observedTestStat)/N, "\n")
+```
+
+---
+
+## Question 3 & 4: One-way ANOVA (diamonds)
+
+Test whether average price depends on clarity. Note: `N` is set to 100 because the dataset is large.
+
+```{r q3_diamonds}
+# Load diamonds data
+data(diamonds)
+
+# Step 1: Initial Test
+myTest <- aov(price ~ clarity, data = diamonds)
+observedTestStat <- summary(myTest)[[1]]$`F value`[1]
+
+# Output the statistic for Question 4
+cat("Question 4 - Observed Test Statistic:", round(observedTestStat, 2), "\n")
+
+# Step 2: Permutation Loop
+set.seed(123)
+N <- 100
+permutedTestStats <- rep(NA, N)
+
+# Isolate price vector to speed up shuffling
+prices <- diamonds$price
+
+for (i in 1:N){
+  # Shuffle prices
+  permuted_prices <- sample(prices)
+  
+  # Run ANOVA on shuffled data
+  permutedTest <- aov(permuted_prices ~ diamonds$clarity)
+  permutedTestStats[i] <- summary(permutedTest)[[1]]$`F value`[1]
+}
+
+# Histogram
+hist(permutedTestStats, main="Permutation Dist (diamonds)", xlab="F-statistic")
+abline(v=observedTestStat, col="red", lwd=2)
+
+# Step 3: P-value
+cat("P(>= observed):", sum(permutedTestStats >= observedTestStat)/N, "\n")
+cat("P(<= observed):", sum(permutedTestStats <= observedTestStat)/N, "\n")
+```
+
+---
+
+## Question 5 & 6: Logistic Regression (SAT)
+
+Test if scoring above 1000 on SAT depends on expenditure per pupil.
+
+```{r q5_sat}
+# Load SAT data from mosaic
+data(SAT)
+
+# Create binary variable for SAT > 1000
+SAT$HighScore <- as.numeric(SAT$sat > 1000)
+
+# Step 1: Initial Test
+myTest <- glm(HighScore ~ expend, data = SAT, family = "binomial")
+# Extract Z value (row 2, column 3 of coefficients)
+observedTestStat <- summary(myTest)$coefficients[2,3]
+
+# Output the statistic for Question 6
+cat("Question 6 - Observed Test Statistic:", round(observedTestStat, 2), "\n")
+
+# Step 2: Permutation Loop
+set.seed(123)
+N <- 100
+permutedTestStats <- rep(NA, N)
+
+for (i in 1:N){
+  # Shuffle the HighScore response
+  permutedData <- SAT
+  permutedData$HighScore <- sample(SAT$HighScore)
+  
+  # Run Logistic Regression on permuted data
+  permutedTest <- glm(HighScore ~ expend, data = permutedData, family = "binomial")
+  permutedTestStats[i] <- summary(permutedTest)$coefficients[2,3]
+}
+
+# Histogram
+hist(permutedTestStats, main="Permutation Dist (SAT)", xlab="Z-statistic")
+abline(v=observedTestStat, col="red", lwd=2)
+
+# Step 3: P-value
+cat("P(>= observed):", sum(permutedTestStats >= observedTestStat)/N, "\n")
+cat("P(<= observed):", sum(permutedTestStats <= observedTestStat)/N, "\n")
+```

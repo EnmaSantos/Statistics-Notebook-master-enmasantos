@@ -1,0 +1,248 @@
+---
+title: "My Two-way ANOVA: Daily Steps, Soda, and Gender"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+# Load necessary libraries
+library(mosaic)
+library(DT)
+library(pander)
+library(car)       
+library(tidyverse) 
+
+
+steps_data <- read_csv("data.csv") 
+
+
+steps_data <- steps_data %>%
+  mutate(
+    Soda_Group = as.factor(Soda_Group),
+    Gender = as.factor(Gender)
+  )
+
+```
+
+<!-- Instructions:
+
+Perform your own mini experiment using two factors that each have at least two levels. Analyze your data using a two-way ANOVA.
+
+Studying reaction time is recommended because the data is quickly collected.
+
+While you should use the warpbreaks example analyses as your guide on how to properly complete this analysis, you should also be creative in your final delivery of this analysis. If you copy the format and approach of the example analyses, be sure to give credit in your document to these example analyses. You could write something like, "This work is modeled after the [warpbreaks](https://byuistats.github.io/Statistics-Notebook/Analyses/ANOVA/Examples/warpbreaksTwoWayANOVA.html) analysis." Whatever you do, DO NOT use any of the written statements from the example analyses in your analysis unless you quote them directly and give credit. Using someone else's writing as your own without giving credit to the original author is plagiarism and is an Honor Code Violation. So do your own work. Plus, the more you try to write things in your own words, the more you will learn. Also, note that there aren't really any "rules" about exactly how your document should be organized. So be creative and organize your file in a way that makes sense to you, but still has all important elements.
+
+-->
+
+Introduction
+------------
+
+**Overall Research Question:** How do 0-calorie soda consumption and gender interact to affect a person's average daily steps? Are there significant main effects for either soda consumption or gender on daily steps?
+
+**Analysis:** A two-way ANOVA will be conducted to analyze the data.
+
+-   **Dependent Variable (Quantitative):** `Daily_Steps`
+
+-   **Independent Variable 1 (Categorical):** `Soda_Group` (Levels: "Drinks 0-Calorie Soda", "Does Not Drink Soda")
+
+-   **Independent Variable 2 (Categorical):** `Gender` (Levels: "Male", "Female")
+
+We will test for a significant interaction effect (`Soda_Group * Gender`) first. If the interaction is not significant, we will examine the main effects of each factor.
+
+Research Questions & Hypotheses
+--------------------------------
+
+**Significance Level:** $\alpha = 0.05$
+
+### 1. Interaction Effect
+
+**Research Question:** Is there an interaction between soda consumption and gender on daily steps?
+
+-   **Null Hypothesis ($H_0$):** There is no interaction effect between `Soda_Group` and `Gender` on `Daily_Steps`. ($\alpha = 0.05$)
+
+-   **Alternative Hypothesis ($H_a$):** There is a significant interaction effect between `Soda_Group` and `Gender` on `Daily_Steps`.
+
+### 2. Main Effect of Soda Consumption
+
+**Research Question:** Does soda consumption affect daily steps?
+
+-   **Null Hypothesis ($H_0$):** There is no main effect of `Soda_Group` on `Daily_Steps`. ($\alpha = 0.05$)
+
+-   **Alternative Hypothesis ($H_a$):** There is a significant main effect of `Soda_Group` on `Daily_Steps`.
+
+### 3. Main Effect of Gender
+
+**Research Question:** Does gender affect daily steps?
+
+-   **Null Hypothesis ($H_0$):** There is no main effect of `Gender` on `Daily_Steps`. ($\alpha = 0.05$)
+
+-   **Alternative Hypothesis ($H_a$):** There is a significant main effect of `Gender` on `Daily_Steps`.
+
+Descriptive Statistics
+----------------------
+
+First, let's look at the raw data and get summary statistics for our four groups.
+
+
+
+```{r}
+
+datatable(steps_data, options = list(pageLength = 5))
+
+
+favstats(Daily_Steps ~ Soda_Group + Gender, data = steps_data) %>%
+  pander(caption = "Descriptive Statistics for Daily Steps by Group")
+```
+
+Two-Way ANOVA Analysis
+----------------------
+
+Since the assumptions are met, we can proceed with the two-way ANOVA. We use the `Anova()` function (with a capital "A") from the `car` package, as it handles unbalanced designs correctly.
+
+```{r, class.output="bg-info"}
+
+steps_aov <- aov(Daily_Steps ~ Soda_Group * Gender, data = steps_data)
+
+
+
+anova_results <- Anova(steps_aov, type = "III")
+pander(anova_results, caption = "Two-Way ANOVA Results (Type III Sum of Squares)")
+```
+
+
+Checking ANOVA Assumptions
+---------------------------
+
+
+```{r}
+par(mfrow=c(1,2))
+
+plot(steps_aov, which=1)
+
+plot(steps_aov, which=2)
+
+par(mfrow=c(1,1))
+```
+**Interpretation:**
+
+-   **Residuals vs Fitted (Left):** We are looking for a random scatter of points ("starry night") around the red line. There is no obvious "megaphone" shape, so the assumption of equal variances is met.
+
+-   **Normal Q-Q (Right):** The points fall roughly along the diagonal dotted line. This indicates the residuals are normally distributed.
+
+
+
+
+
+Graphical Summaries & Conclusions
+---------------------------------
+
+The ANOVA analysis found a significant effect for **Soda Consumption** (p < 0.001), but no significant effect for **Gender** (p = 0.217) and no significant **Interaction** (p = 0.770).
+
+Below, we visualize these three specific findings.
+
+### 1. Soda Consumption (Significant)
+
+Since the p-value is significant (< 0.05), we color this graph to highlight the difference. Individuals who do not drink soda take significantly more steps.
+
+**Numerical Summary for Soda Group:**
+
+```{r}
+soda_summary <- steps_data %>%
+  group_by(Soda_Group) %>%
+  summarise(
+    `Mean Daily Steps` = round(mean(Daily_Steps), 0),
+    `Standard Deviation` = round(sd(Daily_Steps), 0),
+    n = n()
+  )
+pander(soda_summary, caption = "Summary Statistics by Soda Consumption")
+```
+
+```{r, message=FALSE, warning=FALSE}
+
+ggplot(steps_data, aes(x = Soda_Group, y = Daily_Steps, color = Soda_Group)) +
+  geom_jitter(width = 0.1, alpha = 0.5) + 
+  stat_summary(fun = mean, geom = "point", size = 4, color = "black") +
+  stat_summary(fun = mean, geom = "line", aes(group=1), color = "black") +
+  labs(
+    title = "Soda Drinkers Walk Significantly Less (p < 0.001)",
+    subtitle = "Black dots represent group means; colored dots are raw data.",
+    y = "Daily Steps",
+    x = ""
+  ) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+### 2.  Gender Effect (Not Significant)
+
+**Numerical Summary for Gender:**
+
+```{r}
+gender_summary <- steps_data %>%
+  group_by(Gender) %>%
+  summarise(
+    `Mean Daily Steps` = round(mean(Daily_Steps), 0),
+    `Standard Deviation` = round(sd(Daily_Steps), 0),
+    n = n()
+  )
+pander(gender_summary, caption = "Summary Statistics by Gender")
+```
+
+```{r}
+ggplot(steps_data, aes(x = Gender, y = Daily_Steps)) +
+  geom_jitter(width = 0.1, alpha = 0.5, color = "gray") + 
+  stat_summary(fun = mean, geom = "point", size = 4, color = "black") +
+  stat_summary(fun = mean, geom = "line", aes(group=1), color = "black") +
+  labs(
+    title = "Gender Does Not Affect Daily Steps (p = 0.217)",
+    y = "Daily Steps",
+    x = ""
+  ) +
+  theme_bw()
+```
+
+### 3. Interaction Effect (Not Significant)
+
+**Full Group Means (All Combinations):**
+
+```{r}
+interaction_summary <- steps_data %>%
+  group_by(Soda_Group, Gender) %>%
+  summarise(
+    `Mean Daily Steps` = round(mean(Daily_Steps), 0),
+    `Standard Deviation` = round(sd(Daily_Steps), 0),
+    n = n(),
+    .groups = "drop"
+  )
+pander(interaction_summary, caption = "Summary Statistics by Soda Group and Gender")
+```
+
+```{r}
+ggplot(steps_data, aes(x = Soda_Group, y = Daily_Steps, color = Gender, group = Gender)) +
+  geom_jitter(width = 0.1, alpha = 0.3) +
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  stat_summary(fun = mean, geom = "line", linewidth = 1) +
+  labs(
+    title = "No Significant Interaction Found (p = 0.770)",
+    subtitle = "The effect of Soda is consistent across Genders",
+    y = "Mean Daily Steps",
+    x = "Soda Group"
+  ) +
+  theme_bw() +
+  scale_color_manual(values = c("gray", "gray"))
+```
+
+Final Thoughts
+--------------
+
+The analysis indicates that **soda consumption** is the only significant factor affecting activity levels in this dataset.
+
+* **Soda:** We observed a significant difference ($p < 0.001$) between the groups. Specifically, individuals who **do not drink soda** averaged approximately **7,528 steps per day**, which is significantly higher than the approximately **6,311 steps** averaged by those who drink 0-calorie soda.
+
+* **Gender:** While males (mean ≈ 7,044 steps) had a slightly higher step count than females (mean ≈ 6,795 steps), this difference was **not statistically significant** ($p = 0.217$).
+
+* **Interaction:** The lack of a significant interaction ($p = 0.770$) confirms that the negative association between soda consumption and step counts remains consistent for both genders.
+
+**Recommendation:** If the goal is to associate behaviors with higher daily activity levels, "Not Drinking Soda" is associated with higher step counts (approximately **1,217 more steps per day** on average), regardless of gender.

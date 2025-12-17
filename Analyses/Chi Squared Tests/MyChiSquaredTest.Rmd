@@ -1,0 +1,135 @@
+---
+title: "Chi Squared Test"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+## Background
+
+For this observational study, I analyzed data from a survey of 300 software developers. The goal was to determine if a developer's choice of primary programming language is related to their preferred beverage while coding.
+
+The two categorical variables analyzed are:
+
+*   **Primary Language** (Python, JavaScript, C++)
+*   **Beverage Preference** (Water, Soda, Juice)
+
+I chose this topic to see if health-conscious choices (like Water) or sugar-based choices (Soda/Juice) correlate with specific tech stacks.
+
+## Hypothesis
+
+My question for the data is: **Is there an association between the programming language a developer uses and their preferred drink?**
+
+My null and alternative hypotheses are as follows:
+
+$$H_{0}: \text{Primary Programming Language and Beverage Preference are independent.}$$
+
+$$H_{a}: \text{Primary Programming Language and Beverage Preference are associated (not independent).}$$
+
+I will be using a level of significance $\alpha=0.05$.
+
+## Analysis
+
+First, let's process the raw survey data to create a table of counts.
+
+```{r}
+# Read the raw data from the CSV file
+# Ensure 'developer_hydration_shuffled.csv' is in the same directory as this .Rmd file
+raw_data <- read.csv("developer_hydration_shuffled.csv")
+
+library(pander)
+
+# Create a contingency table (counts) from the raw observations
+data_table <- table(raw_data$Primary_Language, raw_data$Beverage_Preference)
+
+# 1. The Contingency Table (Observed Counts)
+# Replace your basic print command with this:
+pander(data_table, caption = "Observed Counts: Programming Language vs. Beverage")
+```
+
+I can verify my sample size assumption here. Every single "combination-group" (cell in the table) has at least 10 observations. This satisfies the requirements for a robust Chi-Squared analysis.
+
+Visually, I can see some interesting trends. C++ developers seem to lean heavily towards Soda, while Python developers have a high count for Water.
+
+The barplot below visualizes these counts:
+
+```{r}
+library(ggplot2)
+
+# Convert your table to a dataframe for ggplot
+df_counts <- as.data.frame(data_table)
+colnames(df_counts) <- c("Language", "Beverage", "Frequency")
+
+ggplot(df_counts, aes(x = Language, y = Frequency, fill = Beverage)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black", width = 0.7) +
+  
+  # Fix Colors: Use a professional, muted palette (ColorBrewer)
+  scale_fill_brewer(palette = "Pastel1") +
+  
+  # Fix Legend: ggplot automatically puts it on the side (no overlap!)
+  labs(
+    title = "Beverage Preference by Programming Language",
+    subtitle = "Python developers show a distinct preference for Water compared to C++",
+    y = "Number of Developers",
+    x = "Primary Programming Language"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+## Chi-Squared Test
+
+Now, I will run a Chi-Squared Test to determine if I reject my null hypothesis. I will also check the expected counts to ensure statistical validity.
+
+```{r message=FALSE, warning=FALSE}
+# Run the Chi-Squared Test
+test_result <- chisq.test(data_table)
+
+# Display the results professionally
+pander(test_result, caption = "Chi-Squared Test Results")
+```
+
+Expected Counts:
+
+```{r}
+# 2. The Expected Counts (Validity Check)
+# Instead of printing the whole test list, extract just the expected table:
+chi_test <- chisq.test(data_table)
+pander(chi_test$expected, caption = "Expected Counts (All > 5, Assumption Met)")
+```
+
+All expected counts are well above 5, so the requirements are met.
+
+My test results show a p-value of $p < 2.2e-16$, which is much smaller than my level of significance $\alpha=0.05$. Therefore, I reject my null hypothesis and conclude that Primary Programming Language and Beverage Preference are associated.
+
+## Residuals
+
+Let us look at the residuals to identify which specific combinations contributed most to this association.
+
+### Residual Analysis
+Since the Chi-Squared test only tells us that an association exists, we examine the residuals to understand where the differences lie. A residual measures the difference between the observed count and what we would expect by chance.
+
+*   **Large Positive (> 2)**: The group chose this option more than expected.
+*   **Large Negative (< -2)**: The group chose this option less than expected.
+
+```{r}
+# 3. The Residuals (The "Why")
+pander(chi_test$residuals, caption = "Standardized Residuals")
+```
+
+I see very large residuals in several places:
+
+*   **C++ and Soda**: A large positive residual suggests C++ developers choose Soda far more often than expected.
+*   **Python and Water**: A positive residual indicates a strong preference for Water among Python users.
+
+## Interpretation
+
+The analysis reveals a statistically significant association between a developer's primary language and their beverage choice ($p < 2.2e-16$).
+
+### Specific Findings:
+
+*   **C++ Developers**: The data shows a strong positive residual for Soda (3.87). This indicates that C++ developers chose soda significantly more frequently than would be expected if there were no association.
+*   **Python Developers**: Conversely, Python developers had a high positive residual for Water (6.74), suggesting a distinct preference for non-caloric hydration compared to their peers.
+
+While the survey cannot determine causation, the distinct clustering suggests that cultural or demographic differences between these two developer communities may influence lifestyle choices.

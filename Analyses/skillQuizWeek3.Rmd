@@ -1,0 +1,103 @@
+---
+title: "skillQuizWeek3"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(dplyr)
+library(mosaicData)
+```
+
+```{r}
+View(KidsFeet)
+?KidsFeet
+
+table(KidsFeet$domhand, KidsFeet$sex)
+
+summary(KidsFeet$sex)
+
+
+KidsFeet %>% 
+  group_by(sex) %>% 
+  summarise(
+    mean_length = mean(length),
+    median_length = median(length), 
+    min_length = min(length),
+    max_length = max(length),
+    sd_length = sd(length),
+    q1_length = quantile(length, probs = 0.25),
+    q3_length = quantile(length, probs = 0.75),
+    count = n()
+  )
+  
+```
+
+```{r}
+?airquality
+View(airquality)
+airquality %>% 
+  group_by(Month) %>% 
+  summarise(
+    mean_temp = mean(Temp, na.rm = TRUE)
+  )
+
+hist(airquality$Temp, xlab="Daily Temperature", main="LaGuardia Airport (May to September 1973)", col="slategray")
+
+plot(Temp ~ Month, data=airquality, xlab="Month", ylab="Temperature", main="LaGuardia Airport (May to September 1973)", pch=16, col="slategray")
+
+boxplot(Temp ~ Month, data=airquality, xlab="Month", ylab="Temperature", main="LaGuardia Airport (May to September 1973)", pch=16, col="slategray")
+
+stripchart(Temp ~ Month, data=airquality, ylab="Month", xlab="Temperature", main="LaGuardia Airport (May to September 1973)", pch=16, col="slategray", method="stack")
+
+plot(Temp ~ Day, data=airquality, xlab="Day of the Month", ylab="Temperature", main="LaGuardia Airport (May to September 1973)", pch=16, col="slategray")
+
+```
+```{r}
+?Orange
+View(Orange)
+
+Orange %>% 
+  filter(age %in% c(484, 1004, 1372)) %>% 
+  group_by(age) %>% 
+  summarise(median_circumference = median(circumference))
+
+```
+```{r}
+airquality %>% 
+  group_by(Month) %>% 
+  summarise(
+    mean_temp = mean(Temp, na.rm = TRUE)
+  )
+```
+```{r}
+Riders %>% 
+  group_by(day) %>% 
+  summarise(
+    total_riders = sum(riders, na.rm = TRUE)
+  )
+```
+
+```{r}
+?mtcars
+
+table(mtcars$cyl)
+
+mtcars %>% 
+  filter(cyl == 4) %>% 
+  group_by(am) %>% 
+  summarise(mean_mpg = mean(mpg))
+
+mtcars %>% 
+  filter(cyl == 8) %>% 
+  group_by(am) %>% 
+  summarise(mean_mpg = mean(qsec))
+
+mtcars %>% 
+  filter(cyl == 6) %>% 
+  group_by(am) %>% 
+  summarise(max_weight = max(wt))
+```
+
+

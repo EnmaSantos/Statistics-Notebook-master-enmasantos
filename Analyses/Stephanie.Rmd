@@ -1,0 +1,107 @@
+---
+title: "Stephanie's Housing Request"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+**Week 2 Analysis**
+
+```{r, message=FALSE, warning=FALSE}
+library(mosaic)
+library(tidyverse)
+library(ggplot2)
+library(pander)
+library(ggrepel)
+library(DT) # If you get an error stating: 
+            # Error in library(DT): there is no package called 'DT'
+            # You will need to run: install.packages("DT") 
+            # in your Console, then try "Knit HTML" again.
+Rent <- read_csv("../Data/rent.csv")
+
+
+```
+
+<br />
+
+## Background
+
+Stephanie[\^1] is a student that will be starting school at BYU-Idaho next semester. Suppose she sent you the following email.
+
+------------------------------------------------------------------------
+
+"Hi. My name is Stephanie. I would like to learn about what housing options I have for living at BYU-Idaho next semester. It will be my first semester there, so I would like to find something that is close to campus and around \$300 a month in rent. I'm not too picky on roommates, but I would like somewhere that has a lot of people around so I can get to know as many people as possible. Thanks in advance!"
+
+------------------------------------------------------------------------
+
+Write your response to Stephanie below. Use the "Rent" dataset, good statistical analysis, and clear writing to make some well supported suggestions to her about apartments that meet her stated criterions. You are free to use other criterion that you think she might find more meaningful as well.
+
+## Response
+
+Hi Stephanie,
+
+It was great to hear from you. I’ve taken a look at the approved women's housing data to find some options that fit your key preferences: a budget around \$300 a month, a short walk to campus, and a social atmosphere with plenty of people to meet.
+
+To help visualize the best options, I filtered for apartments under \$350/month and plotted them on the chart below. This chart shows the trade-offs between monthly rent (y-axis), distance to campus (x-axis), and the number of residents (represented by the size of the blue circles).
+
+<!-- Hint, you should probably subset the Rent dataset to only show the "Approved Women's Housing" since Stephanie won't be interested in Male Housing options. Notice how this text in green doesn't show up in the HTML output because we used the HTML comment tags around this text. -->
+
+```{r}
+Womens_Housing <- Rent %>%
+  filter(`Housing Type` == "Approved Women's Housing")
+
+Womens_Housing_Monthly <- Womens_Housing %>%
+  mutate(
+    Monthly_Price_Low = `Price Low` / 3,
+    Monthly_Price_High = `Price High` / 3
+  )
+Top_Options <- Womens_Housing_Monthly %>%
+  filter(Monthly_Price_Low <= 350) %>%
+  arrange(CrowFlyMetersToMC)
+
+
+ggplot(data = Top_Options, aes(x = CrowFlyMetersToMC, y = Monthly_Price_Low)) +
+  geom_point(aes(size = Residents), alpha = 0.7, color = "dodgerblue") +
+  geom_label_repel(aes(label = `Apartment Name`),
+                   size = 2.5,
+                   box.padding = 0.5,
+                   max.overlaps = Inf) +
+  labs(
+    title = "Housing Options: Balancing Price, Distance, and Social Life",
+    x = "Distance from Campus (Meters)",
+    y = "Estimated Monthly Rent ($)",
+    size = "Number of Residents",
+    caption = "Apartments with rent under $350/month"
+  ) + 
+  theme_minimal() +
+
+  theme(plot.caption = element_text(hjust = 0.5, size = 10))
+```
+
+As you can see from the chart, there are always trade-offs. For instance, while [Riviera Apartments](https://riviera-apts.com/) is one of the closest options, it's on the higher end of your budget. On the other hand, a complex like [Bayside Manor](https://baysidemanor.blogspot.com/) is very affordable but has only 8 residents, which doesn't match the vibrant social scene you're looking for.
+
+For these reasons, my top recommendation is [Davenport Apartments](http://www.visualary.com/davenport/index.html). It provides the best balance of all your criteria. Its estimated rent is about \$315/month, and with 71 residents, it offers the great social environment you want. At just 470 meters from campus, it’s also a very easy walk that should take right around 5-6 minutes to get to class. It provides a fantastic combination of affordability, social opportunity, and convenience.
+
+To give you a broader overview, here is a summary of the top options I analyzed.
+
+```{r}
+Summary_Table <- Top_Options %>%
+  summarise(
+    `Number of Options (under $350)` = n(),
+    `Average Monthly Price` = mean(Monthly_Price_Low),
+    `Median Distance (meters)` = median(CrowFlyMetersToMC),
+    `Closest Option (meters)` = min(CrowFlyMetersToMC),
+    `Average Number of Residents` = mean(Residents)
+  )
+
+pander(Summary_Table, caption = "Summary of Top Housing Options Under $350/month", split.table = Inf)
+```
+
+I hope this data-driven look at your options is helpful for your decision! Best of luck with your first semester at BYU-Idaho!
+
+Sincerely,
+
+Enmanuel

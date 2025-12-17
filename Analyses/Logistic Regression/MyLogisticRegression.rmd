@@ -1,0 +1,143 @@
+---
+title: "Pima Indians Diabetes -- Logistic Regression"
+output: 
+  html_document: 
+    theme: cerulean
+    code_folding: hide
+---
+
+<hr />
+
+## Background
+
+
+The Pima Indians of Arizona have the highest reported prevalence of diabetes of any population in the world. This dataset, originally from the National Institute of Diabetes and Digestive and Kidney Diseases, is frequently used to research the medical factors associated with the onset of the disease.
+
+For the purposes of this analysis, we focus specifically on **Plasma Glucose Concentration**. Medical professionals have long understood that elevated blood sugar is a primary indicator of diabetes. We aim to model exactly how the probability of a positive diagnosis increases as glucose levels rise, and to identify the specific "danger zone" where the probability exceeds 50%.
+
+## The Data
+
+The response variable ($Y$) in this dataset is `Outcome`, where 1 indicates the patient has diabetes and 0 indicates they are healthy. The explanatory variable ($X$) is `Glucose`, representing plasma glucose concentration.
+
+```{r, warning=FALSE, message=FALSE}
+
+library(DT)
+library(pander)
+library(ResourceSelection)
+library(ggplot2)
+
+
+url <- "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+diabetes_data <- read.csv(url, header=FALSE)
+names(diabetes_data) <- c("Pregnancies", "Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI", "Pedigree", "Age", "Outcome")
+```
+
+```{r}
+
+datatable(diabetes_data)
+```
+
+<br />
+
+## Logistic Model
+
+The probability of a patient having diabetes ($Y=1$) based on their glucose level ($x$) is given by the following logistic regression model:
+
+$$
+P(Y_i = 1|x_i) = \frac{e^{\beta_0+\beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}} = \pi_i
+$$
+
+In this model, for each patient $i$:
+
+* $Y_i = 1$ denotes the patient has diabetes.
+* $Y_i = 0$ denotes the patient is healthy.
+* $x_i$ denotes the Plasma Glucose Concentration.
+
+### Hypothesis Testing
+
+If $\beta_1$ is zero, then glucose levels provide no predictive power for diabetes. If it is not zero, glucose is a significant risk factor. We test this at the $\alpha = 0.05$ level:
+
+**$H_0: \beta_{1} = 0$** (Glucose level has no effect on the probability of diabetes).
+
+**$H_a: \beta_{1} \neq 0$** (Glucose level significantly impacts the probability of diabetes).
+
+<br />
+
+### Fitting the Model
+
+The estimates of the coefficients $\beta_0$ and $\beta_1$ for the above logistic regression model and data are shown below.
+
+```{r}
+
+diabetes_model <- glm(Outcome ~ Glucose, data=diabetes_data, family=binomial)
+
+
+
+pander(summary(diabetes_model)$coefficients, 
+       caption = "Logistic Regression Coefficient Estimates")
+
+
+b0 <- coef(diabetes_model)[1]
+b1 <- coef(diabetes_model)[2]
+```
+
+<br>
+
+This gives the estimated model for $\pi_i$ as:
+
+$$
+P(Y_i = 1|x_i) \approx \frac{e^{`r round(b0, 3)` + `r round(b1, 3)` x_i}}{1+e^{`r round(b0, 3)` + `r round(b1, 3)` x_i}} = \hat{\pi}_i
+$$
+
+where $b_0 = `r round(b0, 3)`$ is the estimate for $\beta_0$ and $b_1 = `r round(b1, 3)`$ is the estimate for $\beta_1$.
+
+Importantly, the $p$-value for the test of `Glucose` shows a significant result ($p < 0.001$) giving sufficient evidence to conclude that $\beta_1 \neq 0$. The glucose level significantly affects the probability of a diabetes diagnosis.
+
+<br />
+
+### Visualizing the Model
+
+The following plot shows the logistic curve fitted to the data. The vertical gray line represents the calculated "threshold" where the probability of diabetes reaches 50%.
+
+```{r, warning=FALSE, message=FALSE}
+
+threshold <- -b0/b1
+
+
+ggplot(diabetes_data, aes(x = Glucose, y = Outcome)) +
+  geom_jitter(height = 0.05, width = 0, alpha = 0.4, color = "black") + 
+  
+  stat_smooth(method="glm", method.args=list(family="binomial"), 
+              se=FALSE, fullrange=TRUE, color = "blue", size=1.2) +
+  
+  geom_vline(xintercept = 141.26, linetype="dashed", color="gray", size=1) +
+  
+  labs(
+    title = "Risk of Diabetes Increases Drastically with Glucose Levels",
+    subtitle = "Probability exceeds 50% when Glucose > 141 mg/dL",
+    y = "Probability of Diagnosis (1=Yes, 0=No)",
+    x = "Plasma Glucose Concentration"
+  ) +
+  theme_minimal()
+```
+
+<br />
+
+### Diagnosing the Model
+
+To demonstrate that the logistic regression is a good fit to these data we apply the Hosmer-Lemeshow goodness of fit test.
+
+```{r}
+pander(hoslem.test(diabetes_data$Outcome, fitted(diabetes_model), g=10))
+```
+
+Since the null hypothesis is that the logistic regression is a good fit for the data, and our p-value > 0.05, we claim that the logistic regression is appropriate.
+
+<br />
+
+## Conclusion
+
+The model confirms that glucose is a critical predictor. The odds of having diabetes increase by a factor of 1.04 for every single unit increase in glucose ($p < 0.001$).
+
+### The Danger Zone:
+Most importantly, this model identifies a clear "tipping point." At a glucose level of 141.26 mg/dL, the probability of a positive diagnosis crosses the 50% threshold. This aligns remarkably well with medical guidelines that classify levels above 140 mg/dL as significant risk territory (Prediabetes/Diabetes).

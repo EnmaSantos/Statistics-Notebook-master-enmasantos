@@ -1,0 +1,59 @@
+---
+title: "Skills Quiz - Kruskal-Wallis Test"
+output: html_document
+---
+
+## Load Library and Explore Data
+
+```{r}
+library(mosaic)
+
+# View help documentation
+?SaratogaHouses
+
+# View the dataset
+View(SaratogaHouses)
+
+# Table of fuel types
+table(SaratogaHouses$fuel)
+```
+
+## Perform Kruskal-Wallis Test
+
+```{r}
+# Kruskal-Wallis test: Does fuel type affect home price distribution?
+kruskal.test(price ~ fuel, data = SaratogaHouses)
+```
+
+## Visualize the Results
+
+```{r}
+# Boxplot to visualize price distributions by fuel type
+boxplot(price ~ fuel, data = SaratogaHouses,
+        main = "Home Prices by Heating Fuel Type",
+        xlab = "Fuel Type",
+        ylab = "Price ($)",
+        col = c("lightblue", "lightgreen", "lightyellow"))
+```
+
+## Calculate Median Prices
+
+```{r}
+# Calculate median price for each fuel type
+medians <- tapply(SaratogaHouses$price, SaratogaHouses$fuel, median)
+medians
+
+# Find which fuel type has the highest median
+names(which.max(medians))
+
+# Get the highest median value
+max(medians)
+```
+
+## Summary Statistics
+
+```{r}
+# Detailed summary statistics by fuel type
+favstats(price ~ fuel, data = SaratogaHouses)
+```
+

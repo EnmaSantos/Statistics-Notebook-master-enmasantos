@@ -1,0 +1,371 @@
+---
+title: "Day Care Fines"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+
+```{r, warning=FALSE, message=FALSE}
+library(mosaic)
+library(DT)
+library(pander)
+library(car)
+library(tidyverse)
+
+# To get the "late" dataset into your R Console, 
+# you need to go to your file menu of R-Studio and select
+# "Session, Set working directory, To source file location"
+# Then click the green "play" arrow in 
+# the top right corner of this gray R-Chunk. 
+
+## Wide data from original article:
+late <- read.csv("../../../Data/late.csv", header=TRUE) 
+
+## Change to "long" data for use in R:
+Late <- pivot_longer(late, #Start with wide data set late
+               cols = starts_with("Week"), #Find columns to gather from long data
+               names_to = "Week", #New column name of Weeks in long data
+               names_prefix = "Week", #Remove prefix of Week from Week1, Week2, ...
+               names_transform = list(Week= ~as.numeric(.x)), #Make Week a numeric column of data
+               values_to = "NumberofLateChildren") #Name of data column in long data
+
+# Rename Week column to Weeks for consistency
+Late <- Late %>% rename(Weeks = Week)
+
+# Create the new 'Period' column
+Late <- Late %>%
+  mutate(
+    Period = case_when(
+      Weeks >= 1 & Weeks <= 4  ~ "Before the Fine",
+      Weeks >= 5 & Weeks <= 16 ~ "Fine Applied",
+      Weeks >= 17 & Weeks <= 20 ~ "Fine Removed"
+    )
+  )
+
+# Convert 'Period' to a factor and set the correct order
+# This ensures R treats it as a category and in the right chronological order for plots.
+Late$Period <- factor(Late$Period, 
+                      levels = c("Before the Fine", "Fine Applied", "Fine Removed"))
+
+```
+
+
+
+<!--If you want to give your critiquers some ideas about what you have questions on and would like help with, place those details here.-->
+
+
+
+<!--End your comments to your critiquers before this line.-->
+
+----
+
+
+## Background {.tabset .tabset-fade}
+
+
+### Study Details
+
+<div style="color:#a8a8a8;">
+This background is quoted directly from the article ["A Fine is a Price"](http://rady.ucsd.edu/faculty/directory/gneezy/pub/docs/fine.pdf). 
+</div>
+
+<div style="padding-left:30px; padding-right:30px;">
+
+There are two types of day-care centers in Israel: private and public. A study was conducted in 10 private day-care centers in the city of Haifa from January to June 1998. All of these centers are located in the same part of town, and there is no important difference among them. During the day children are organized into groups according to age, from 1 to 4 years old. Each day-care center is allowed to hold a maximum of 35 children. In some exceptional cases a few additional children are allowed. The fee for each child is NIS 1,400 per month. (The NIS is the New Israeli Shekel.) At the time of the study, a U.S. dollar was worth approximately NIS 3.68, so the fee was about $380 at that time. 
+
+The contract signed at the beginning of the year states that the day-care
+center operates between 0730 and 1600. There is no mention of what happens if parents come late to pick up their children. In particular, before the beginning of the study, there was no fine for coming late. When parents did not come on time, one of the teachers had to wait with the children concerned. Teachers would rotate in this task, which is considered part of the job of a teacher, a fact that is clearly explained when a teacher is hired. Parents rarely came after 1630. 
+
+A natural option [to fix the problem of parents showing up late] is to introduce a fine: every time a parent comes late, [they] will have to pay a fine. Will that reduce the number of parents who come late? If the fine is removed, will things revert back to the way they were originally?
+
+The overall period of the study was 20 weeks. In the first 4 weeks we
+simply recorded the number of parents who arrived late each week. At the
+beginning of the fifth week, we introduced a fine in six of the 10 day-care centers, which had been selected randomly. The announcement of the fine was made with a note posted on the bulletin board of the day-care center. Parents tend to look at this board every day, since important announcements are posted there. The announcement specified that the fine would be NIS 10 for a delay of 10 minutes or more. The fine was per child; thus, if parents had two children in the center and they came late, they had to pay NIS 20. Payment was made to the principal of the day-care center at the end of the month. Since monthly payments are made to the owner during the year, the fines were added to those amounts. The money was paid to the owner, rather then to the teacher who was staying late (and did not get any additional money). The teachers were informed of the fine but not of the study. Registering the names of parents who came late was a common practice in any case.
+
+At the beginning of the seventeenth (17th) week, the fine was removed with no explanation. Notice of the cancellation was posted on the board. If parents asked why the fines were removed, the principals were instructed to reply that the fine had been a trial for a limited time and that the results of this trial were now being evaluated.
+
+A comparison with other fines in Israel may give an idea of the size of
+the penalty that was introduced. A fine of NIS 10 is relatively small but not insignificant. In comparison, the fine for illegal parking is NIS 75; the fine for driving through a red light is NIS 1,000 plus penalties; the fine for not collecting the droppings of a dog is NIS 360. For many of these violations, however, detection and enforcement are low or, as in the case of dog dirt, nonexistent in practice. A baby-sitter earns between NIS 15 and NIS 20 per hour. The average gross salary per month in Israel at the time of the study was NIS 5,595.
+
+</div>
+
+
+### The Data (Wide)
+
+
+The `late` Day Care Center data is shown here in the "wide data format" that was provided by the authors of the original research article. But this format is not terribly useful for an ANOVA analysis.
+
+```{r, out.width=300}
+#Show the full width of the "Wide" version of the late data:
+pander(late, split.tables = Inf)
+```
+
+
+### The Data (Long)
+
+The `Late` Day Care Center data is shown here in the "long data format", a more useable format for analysis.
+
+```{r}
+pander(Late)
+```
+
+
+ 
+##  
+
+
+----
+
+
+
+## Analysis {.tabset .tabset-fade}
+
+### Hypotheses
+
+**Hypotheses about Treatment:**
+
+- $H_0: \mu_{\text{Control}} = \mu_{\text{Fine}}$
+- $H_a: \mu_{\text{Control}} \neq \mu_{\text{Fine}}$
+
+**Hypotheses about Period:**
+
+- $H_0: \mu_{\text{Before}} = \mu_{\text{Applied}} = \mu_{\text{Removed}}$
+- $H_a: \text{At least one } \mu_{\text{Period}} \text{ is different.}$
+
+**Hypotheses about the interaction of Treatment and Period:**
+
+- $H_0$: The effect of the **Treatment** on the average **number of late children** picked up does not depend on the **Period** of the study.
+- $H_a$: The effect of the **Treatment** on the average **number of late children** picked up changes during at least one **Period** of the study.
+
+
+
+### Two-way ANOVA 
+
+```{r}
+# Perform the two-way ANOVA
+# We model NumberofLateChildren as a function of Treatment, Period, and their interaction
+model <- aov(NumberofLateChildren ~ Treatment * Period, data = Late)
+
+# View the ANOVA table with Df and p-values
+summary(model)
+```
+
+**Degrees of Freedom Check:**
+
+The sum of all degrees of freedom should equal $n-1 = 200-1 = 199$:
+- Df(Treatment) + Df(Period) + Df(Treatment:Period) + Df(Residuals) = 199
+
+
+```{r}
+# Perform the two-way ANOVA
+# We model NumberofLateChildren as a function of Treatment, Period, and their interaction
+model <- aov(NumberofLateChildren ~ Treatment * Period, data = Late)
+
+# View the ANOVA table with Df and p-values
+summary(model)
+```
+
+
+### Graphics & Numerical Summaries
+
+**1. Treatment Factor**
+
+```{r}
+# Plot for Treatment
+xyplot(NumberofLateChildren ~ Treatment, data = Late, 
+       type = c("p", "a"), 
+       main = "Late Pickups by Treatment Group")
+
+# Supporting table for Treatment
+favstats(NumberofLateChildren ~ Treatment, data = Late)
+```
+
+**2. Period Factor**
+
+```{r}
+# Plot for Period
+xyplot(NumberofLateChildren ~ Period, data = Late, 
+       type = c("p", "a"),
+       main = "Late Pickups by Study Period")
+
+# Supporting table for Period
+favstats(NumberofLateChildren ~ Period, data = Late)
+```
+
+**3. Interaction Plot (Most Important)**
+
+This plot shows how the two factors work together.
+
+```{r}
+# Interaction Plot (using xyplot)
+# This shows the data points
+xyplot(NumberofLateChildren ~ Period, data = Late, groups = Treatment,
+       type = c("p", "a"), 
+       main = "Interaction: Late Pickups by Period and Treatment",
+       auto.key = list(title = "Treatment", columns = 2, corner = c(0, 1)))
+```
+
+```{r}
+# It's often clearer to plot just the means
+# The interaction.plot function is great for this.
+interaction.plot(x.factor = Late$Period,
+                 trace.factor = Late$Treatment,
+                 response = Late$NumberofLateChildren,
+                 fun = mean,
+                 type = "b", # "b" for both points and lines
+                 pch = c(1, 19), # point styles
+                 col = c("blue", "red"),
+                 xlab = "Period",
+                 ylab = "Mean Number of Late Children",
+                 trace.label = "Treatment Group")
+```
+
+```{r}
+# Supporting table for the Interaction
+# This gives you the means for all 6 conditions shown in the plot
+favstats(NumberofLateChildren ~ Period + Treatment, data = Late)
+```
+
+
+
+
+
+### Conclusions
+
+**Significant Findings:**
+
+Based on the ANOVA table, the **interaction (Treatment:Period)** p-value is highly significant. This is the most important finding, as it indicates that the effect of the Treatment depends on the Period of the study.
+
+**Interpretation:**
+
+A significant interaction means we *cannot* interpret the main effects alone. The effect of the "Treatment" *depends on* the "Period."
+
+Looking at the interaction plot and summary tables:
+
+- **Control Group (No Fine):** The late pickups remained relatively low and consistent across all three periods (Before the Fine, Fine Applied, and Fine Removed).
+
+- **Treatment Group (Fine Applied):**
+  - **Before the Fine:** Similar to the control group, with low numbers of late pickups.
+  - **Fine Applied:** The late pickups actually *increased* significantly. The fine of **10 NIS** (approximately $3 USD at the time), which was less than the cost of a babysitter (15-20 NIS per hour), appears to have been perceived as a *price* for a service ("I can pay to be late") rather than a *penalty* to be avoided. This counterintuitive result suggests that introducing a monetary fine transformed the social norm into a market transaction.
+  - **Fine Removed:** The late pickups remained high even after the fine was removed. The social norm ("don't be late") had been broken and replaced by a financial one. Removing the fine did not restore the original behavior, indicating that the damage to the social contract was permanent.
+
+This study demonstrates the importance of understanding behavioral economics and social norms. What seems like a straightforward solution (introducing a fine) can have unintended consequences when it changes the nature of the relationship from a social contract to a market transaction.
+
+
+
+### Diagnostic Plots
+
+**ANOVA Assumptions:**
+
+ANOVA requires three key assumptions to be satisfied for valid results:
+
+1. **Independence:** The observations must be independent of each other. This is checked by the study design. Since the 10 daycares were separate entities and observations were taken across different weeks, we can assume independence.
+
+2. **Normality of Residuals:** The errors (residuals) should be normally distributed. We check this with a Q-Q plot.
+
+3. **Equal Variances (Homoscedasticity):** The spread (variance) of the residuals should be similar for all groups. We check this by plotting the residuals against the fitted values.
+
+**Checking the Assumptions:**
+
+```{r}
+# Check for Normality of Residuals
+qqnorm(model$residuals)
+qqline(model$residuals) 
+# Points should fall close to the line
+```
+
+```{r}
+# Check for Equal Variances
+plot(model$fitted.values, model$residuals,
+     xlab = "Fitted Values", ylab = "Residuals",
+     main = "Residuals vs. Fitted Plot")
+# Add a horizontal line at zero
+abline(h = 0, col = "red", lty = 2)
+# We want to see a random, "shotgun blast" of points with no clear pattern (like a cone).
+```
+
+**Discussion:**
+
+As stated in D&C 82:10: *"I, the Lord, am bound when ye do what I say; but when ye do not what I say, ye have no promise."*
+
+- When the assumptions *are* satisfied, statistics is "bound" to give you valid, reliable results. You can trust your p-values.
+- When the assumptions *are not* satisfied, you have "no promise" that your results are meaningful. Your p-values might be wrong, and your conclusions could be misleading.
+
+If assumptions are badly violated, you should report it and state that the conclusions should be treated with caution. You might then try to (1) **transform your data** (e.g., a log transform) or (2) use a more robust, **non-parametric test** that doesn't have these assumptions.
+
+
+```{r}
+# Make sure you have the mosaic library loaded
+library(mosaic)
+
+# --- Question 6: Part 1 (Treatment) ---
+
+# 1.a) Create an xyplot of the Treatment factor
+# 'type = c("p", "a")' adds the points (p) and the average line (a)
+print(xyplot(NumberofLateChildren ~ Treatment, data = Late, 
+       type = c("p", "a"), 
+       main = "Plot 1: Late Pickups by Treatment Group",
+       ylab = "Number of Late Children",
+       xlab = "Treatment Group"))
+
+# 1.b) Create a supporting table of means for this plot
+favstats(NumberofLateChildren ~ Treatment, data = Late)
+
+
+# --- Question 6: Part 2 (Period) ---
+
+# 2.a) Create an xyplot of the Period factor
+print(xyplot(NumberofLateChildren ~ Period, data = Late, 
+       type = c("p", "a"),
+       main = "Plot 2: Late Pickups by Study Period",
+       ylab = "Number of Late Children",
+       xlab = "Study Period"))
+
+# 2.b) Create a supporting numerical summary table of means
+favstats(NumberofLateChildren ~ Period, data = Late)
+
+
+# --- Question 6: Part 3 (Interaction) ---
+
+# 3.a) Create an xyplot that shows the interaction
+# We put Period (most levels) on the x-axis and use 'groups = Treatment'
+# 'auto.key' adds a legend.
+print(xyplot(NumberofLateChildren ~ Period, data = Late, groups = Treatment,
+       type = c("p", "a"), 
+       main = "Plot 3: Interaction of Treatment and Period",
+       ylab = "Number of Late Children",
+       xlab = "Study Period",
+       auto.key = list(title = "Treatment", columns = 2, corner = c(0, 1))))
+
+# 3.b) Create a table of numerical summaries for all six conditions
+favstats(NumberofLateChildren ~ Period + Treatment, data = Late)
+
+
+# --- Optional: A Cleaner Interaction Plot ---
+# The xyplot above can be messy with all the points.
+# The 'interaction.plot' function is built to show just the means,
+# which is often much easier to read.
+interaction.plot(
+  x.factor = Late$Period,
+  trace.factor = Late$Treatment,
+  response = Late$NumberofLateChildren,
+  fun = mean,
+  type = "b", # "b" for both points and lines
+  pch = c(1, 19), # Point styles
+  col = c("blue", "red"), # Colors for the lines
+  xlab = "Study Period",
+  ylab = "Mean Number of Late Children",
+  main = "Interaction Plot (Means Only)",
+  trace.label = "Treatment"
+)
+```
+
+```{r}
+
+```
+
+
+
+

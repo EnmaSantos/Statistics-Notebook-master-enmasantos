@@ -1,0 +1,135 @@
+---
+title: "mobius_activity"
+output: html_document
+---
+
+```{r}
+# Load the tidyverse library for all operations
+library(tidyverse)
+
+# Input the data
+Honda_mpg <- data.frame(date = c("06/01/20", "08/19/20", "09/14/20", "01/07/21", "07/22/21", "08/16/21", "10/24/21", "12/31/21", "03/12/22", "05/04/22", "07/09/22", "10/12/22"),
+                        milesDriven = c(274.4, 266.8, 317.0, 113.4, 326.2, 62.6, 239.8, 242.0, 195.6, 106.4, 379.3, 325.4),
+                        gallonsUsed = c(12.42, 12.255, 15.224, 7.953, 16.378, 3.285, 13.230, 10.467, 9.310, 4.721, 16.958, 16.221))
+
+# Use mutate to create the new mpg column
+Honda_mpg <- Honda_mpg %>%
+  mutate(mpg = milesDriven / gallonsUsed)
+
+# You can view the new data frame to confirm
+# View(Honda_mpg)
+
+```
+
+
+```{r}
+# Make sure library(tidyverse) is loaded first
+ggplot(Honda_mpg, aes(x = mpg)) + 
+  geom_dotplot(binwidth = .1) + 
+  geom_segment(aes(x=17, xend=17, y=0, yend=0.5), color="skyblue") +
+  geom_text(aes(x=17, y=.6), label="Median Hypothesized to be 17 mpg", color="skyblue") + 
+  labs(title="2010 Honda Odyssey Gas Mileages", y="", x="Miles Per Gallon Vehicle Achieved on Systematically Selected Dates") + 
+  theme(axis.ticks.y=element_blank(), axis.text.y=element_blank())
+```
+
+
+```{r}
+# Run the Wilcoxon Signed-Rank test
+# We use mu = 17 to specify the hypothesized median
+wilcox.test(Honda_mpg$mpg, mu = 17)
+```
+
+```{r}
+# Calculate the median of the mpg column
+median(Honda_mpg$mpg)
+```
+
+```{r}
+library(mosaic)
+library(car)
+
+# Filter for "prof" and "wc" types
+duncan_filtered <- Duncan %>%
+  filter(type == "prof" | type == "wc")
+
+# 1. Run the Wilcoxon Rank Sum Test
+# R automatically makes "prof" group 1 (alphabetical)
+wilcox.test(prestige ~ type, data = duncan_filtered, alternative = "greater")
+
+# 2. Create the boxplot
+# We use droplevels() to remove the unused "bc" level from the factor
+ggplot(droplevels(duncan_filtered), aes(x = type, y = prestige)) +
+  geom_boxplot()
+
+# 3. Get the numerical summaries (favstats)
+favstats(prestige ~ type, data = droplevels(duncan_filtered))
+```
+
+```{r}
+# Make sure you have your filtered data
+duncan_filtered <- Duncan %>%
+  filter(type == "prof" | type == "wc")
+
+# Run favstats
+favstats(prestige ~ type, data = droplevels(duncan_filtered))
+```
+```{r}
+library(mosaic)
+
+# Mutate the 'rank' column to character
+Salaries2 <- Salaries %>%
+  mutate(rank = as.character(rank))
+
+# Filter for only "Prof" rank
+prof_salaries <- Salaries2 %>%
+  filter(rank == "Prof")
+
+# --- Get Numerical Summaries ---
+# This gives you the median and sample sizes
+favstats(salary ~ sex, data = prof_salaries)
+
+# --- Run the Hypothesis Test ---
+# This gives you the test type, statistic, and p-value
+wilcox.test(salary ~ sex, data = prof_salaries)
+```
+
+```{r}
+# Ensure you have the 'prof_salaries' data filtered for "Prof"
+prof_salaries <- Salaries2 %>%
+  filter(rank == "Prof")
+
+# Calculate the median for Male Professors
+median_male <- median(prof_salaries$salary[prof_salaries$sex == "Male"])
+
+# Calculate the median for Female Professors
+median_female <- median(prof_salaries$salary[prof_salaries$sex == "Female"])
+
+# Calculate and print the difference
+salary_difference <- median_male - median_female
+print(salary_difference)
+```
+
+```{r}
+# Load the libraries
+library(car)
+library(mosaic)
+
+# 1. Filter for men and create the 'weight_diff' column
+# This is the code for the first step in the prompt
+Davis2 <- Davis %>%
+  filter(sex == "M") %>%
+  mutate(weight_diff = weight - repwt) # Actual - Reported
+
+# 2. Find the median of the differences
+# This answers the question: "In fact, the median weight difference is..."
+# We use na.rm = TRUE because there are some missing (NA) values
+median_difference <- median(Davis2$weight_diff, na.rm = TRUE)
+print(paste("Median Difference:", median_difference))
+
+# 3. Perform the Wilcoxon Signed-Rank Test
+# This answers all the "Your Answer" questions
+# We test our single column of differences against a hypothesized median (mu) of 0
+wilcox.test(Davis2$weight_diff, mu = 0)
+```
+
+
